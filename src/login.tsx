@@ -3,6 +3,8 @@ import React from "react";
 import axios from "axios";
 import { useMutation } from "react-query";
 import "./login.css";
+import api, { addInterceptor } from "./api/myApi";
+import { LoginModel } from "./api/__generated__/api";
 
 // const [token, setToken] = useState("");
 const axiosApiInstance = axios.create();
@@ -14,49 +16,21 @@ function Login() {
   const [token, setToken] = useState("");
 
   const [user, setUser] = useState(null);
-  function login({
-    username,
-    password,
-  }: {
-    username: string;
-    password: string;
-  }) {
-    return axiosApiInstance.post(
-      "/api/auth/login",
-      { username, password },
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+  function login(payload: LoginModel) {
+    return api.api.authLoginCreate(payload, {
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   function onSubmit(e: SubmitEvent) {
     e.preventDefault();
     login({ username, password }).then((response) => {
       setToken(response.headers.token);
-      axiosApiInstance.interceptors.request.use(
-        async (config) => {
-          // const value = await redisClient.get(rediskey)
-          // const keys = JSON.parse(value)
-          config.headers = {
-            Authorization: `Bearer ${response.headers.token}`,
-            Accept: "application/json",
-            "Content-Type": "application/x-www-form-urlencoded",
-          };
-          return config;
-        },
-        (error) => {
-          Promise.reject(error);
-        }
-      );
+      addInterceptor(response.headers.token);
     });
   }
 
-  function getEvents() {
-    return axiosApiInstance.get("/api/events", {
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const getEvents = api.api.eventsList;
 
   return (
     <div className="login">
@@ -90,7 +64,7 @@ function Login() {
             Login successed! {user?.username}
           </span>
         )}
-        <button onClick={getEvents}>Get events</button>
+        <button onClick={() => getEvents()}>Get events</button>
       </div>
     </div>
   );
