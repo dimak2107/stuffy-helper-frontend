@@ -7,7 +7,6 @@ import { TextField } from "@mui/material";
 
 function App() {
   const [count, setCount] = useState(0);
-
   return (
     <div className="App">
       <div>
@@ -19,9 +18,7 @@ function App() {
         </a>
       </div>
       <h1>Vite + React + + Typescript + MUI 5</h1>
-
       <TextField id="standard-basic" label="Standard" variant="standard" />
-
       <Button color="secondary">Secondary</Button>
       <Button variant="contained" color="success">
         Success
