@@ -9,14 +9,26 @@
  * ---------------------------------------------------------------
  */
 
+export enum FileType {
+  Jpg = "Jpg",
+  Jpeg = "Jpeg",
+  Png = "Png",
+  Pdf = "Pdf",
+  Txt = "Txt",
+  Doc = "Doc",
+  Docx = "Docx",
+  Xls = "Xls",
+  Xlsx = "Xlsx",
+}
+
 export interface GetEventEntry {
   /** @format uuid */
-  id?: string;
+  id: string;
   name: string;
   description?: string | null;
 
   /** @format date-time */
-  createdDate?: string;
+  createdDate: string;
 
   /** @format date-time */
   eventDateStart: string;
@@ -24,11 +36,11 @@ export interface GetEventEntry {
   /** @format date-time */
   eventDateEnd?: string;
   userId: string;
-  isCompleted?: boolean;
-  isActive?: boolean;
+  isCompleted: boolean;
   user: GetUserEntry;
   participants?: GetParticipantEntry[] | null;
   shoppings?: GetShoppingEntry[] | null;
+  medias?: GetMediaEntry[] | null;
 }
 
 export interface GetEventEntryResponse {
@@ -41,10 +53,19 @@ export interface GetEventEntryResponse {
   total?: number;
 }
 
-export interface GetParticipantEntry {
+export interface GetMediaEntry {
   /** @format uuid */
   id?: string;
-  isActive?: boolean;
+  fileType?: FileType;
+  mediaUid?: string | null;
+  mediaType?: MediaType;
+  link?: string | null;
+  event?: GetEventEntry;
+}
+
+export interface GetParticipantEntry {
+  /** @format uuid */
+  id: string;
   user: GetUserEntry;
   event: GetEventEntry;
   shoppings?: GetShoppingEntry[] | null;
@@ -63,7 +84,7 @@ export interface GetParticipantEntryResponse {
 
 export interface GetPurchaseEntry {
   /** @format uuid */
-  id?: string;
+  id: string;
   name: string;
 
   /** @format double */
@@ -74,7 +95,6 @@ export interface GetPurchaseEntry {
 
   /** @format int32 */
   count?: number;
-  isActive?: boolean;
   shopping: GetShoppingEntry;
   purchaseTags?: GetPurchaseTagEntry[] | null;
   unitType: GetUnitTypeEntry;
@@ -93,9 +113,8 @@ export interface GetPurchaseEntryResponse {
 
 export interface GetPurchaseTagEntry {
   /** @format uuid */
-  id?: string;
+  id: string;
   name: string;
-  isActive?: boolean;
   purchases?: GetPurchaseEntry[] | null;
 }
 
@@ -111,7 +130,7 @@ export interface GetPurchaseTagEntryResponse {
 
 export interface GetPurchaseUsageEntry {
   /** @format uuid */
-  id?: string;
+  id: string;
   participant: GetParticipantEntry;
   purchase: GetPurchaseEntry;
 }
@@ -128,13 +147,12 @@ export interface GetPurchaseUsageEntryResponse {
 
 export interface GetShoppingEntry {
   /** @format uuid */
-  id?: string;
+  id: string;
 
   /** @format date-time */
   shoppingDate: string;
   check?: string | null;
   description: string;
-  isActive?: boolean;
   event: GetEventEntry;
   participant: GetParticipantEntry;
   purchases?: GetPurchaseEntry[] | null;
@@ -152,9 +170,8 @@ export interface GetShoppingEntryResponse {
 
 export interface GetUnitTypeEntry {
   /** @format uuid */
-  id?: string;
+  id: string;
   name: string;
-  isActive?: boolean;
   purchases?: GetPurchaseEntry[] | null;
 }
 
@@ -185,6 +202,15 @@ export interface LoginModel {
   password: string;
 }
 
+export enum MediaType {
+  Image = "Image",
+  Video = "Video",
+  Audio = "Audio",
+  Document = "Document",
+  Link = "Link",
+  Unknown = "Unknown",
+}
+
 export interface RegisterModel {
   username: string;
 
@@ -209,7 +235,7 @@ export interface UpsertEventEntry {
 
   /** @format date-time */
   eventDateEnd?: string;
-  isCompleted?: boolean;
+  isCompleted: boolean;
   userId: string;
   isActive?: boolean;
 }
@@ -638,6 +664,108 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         secure: true,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Media
+     * @name EventsMediaFormFileCreate
+     * @request POST:/api/events/{eventId}/media/form-file
+     * @secure
+     */
+    eventsMediaFormFileCreate: (
+      eventId: string,
+      query: { mediaType: MediaType; link?: string },
+      data: { file?: File },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetMediaEntry, string>({
+        path: `/api/events/${eventId}/media/form-file`,
+        method: "POST",
+        query: query,
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Media
+     * @name EventsMediaFormFileDetail
+     * @request GET:/api/events/{eventId}/media/{mediaUid}/form-file
+     * @secure
+     */
+    eventsMediaFormFileDetail: (eventId: string, mediaUid: string, params: RequestParams = {}) =>
+      this.request<void, string>({
+        path: `/api/events/${eventId}/media/${mediaUid}/form-file`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Media
+     * @name EventsMediaMetadataDetail
+     * @request GET:/api/events/{eventId}/media/{mediaUid}/metadata
+     * @secure
+     */
+    eventsMediaMetadataDetail: (eventId: string, mediaUid: string, params: RequestParams = {}) =>
+      this.request<GetMediaEntry, string>({
+        path: `/api/events/${eventId}/media/${mediaUid}/metadata`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Media
+     * @name EventsMediaDelete
+     * @request DELETE:/api/events/{eventId}/media/{mediaUid}
+     * @secure
+     */
+    eventsMediaDelete: (eventId: string, mediaUid: string, params: RequestParams = {}) =>
+      this.request<void, string>({
+        path: `/api/events/${eventId}/media/${mediaUid}`,
+        method: "DELETE",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Media
+     * @name MediaMetadataList
+     * @request GET:/api/media/metadata
+     * @secure
+     */
+    mediaMetadataList: (
+      query?: {
+        offset?: number;
+        limit?: number;
+        eventId?: string;
+        createdDateStart?: string;
+        createdDateEnd?: string;
+        mediaType?: MediaType;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetMediaEntry[], string>({
+        path: `/api/media/metadata`,
+        method: "GET",
+        query: query,
+        secure: true,
         format: "json",
         ...params,
       }),

@@ -8,7 +8,7 @@ import React, {
 } from "react";
 // import { useHistory, useLocation } from "react-router-dom";
 import api, { addInterceptor } from "../api/myApi";
-import { LoginModel } from "../api/__generated__/api";
+import { LoginModel, RegisterModel } from "../api/__generated__/api";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -19,8 +19,9 @@ interface AuthContextType {
   loading: boolean;
   error?: any;
   login: (payload: LoginModel) => void;
+  register: (payload: RegisterModel) => void;
   //   signUp: (email: string, name: string, password: string) => void;
-  //   logout: () => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -73,6 +74,20 @@ export function AuthProvider({
       .finally(() => setLoading(false));
   }
 
+  function register(payload: RegisterModel) {
+    setLoading(true);
+
+    api.api
+      .authRegisterCreate(payload, {
+        headers: { "Content-Type": "application/json" },
+      })
+      .then((response) => {});
+  }
+
+  function logout() {
+    api.api.authLogoutCreate();
+  }
+
   // TODO: LOGOUT
   //   function logout() {
   //     sessionsApi.logout().then(() => setUser(undefined));
@@ -84,8 +99,8 @@ export function AuthProvider({
       loading,
       error,
       login,
-      // signUp,
-      // logout,
+      register,
+      logout,
     }),
     [loading, error]
   );

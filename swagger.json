@@ -550,6 +550,334 @@
         }
       }
     },
+    "/api/events/{eventId}/media/form-file": {
+      "post": {
+        "tags": ["Media"],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "mediaType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MediaType"
+            }
+          },
+          {
+            "name": "link",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMediaEntry"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Client Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{eventId}/media/{mediaUid}/form-file": {
+      "get": {
+        "tags": ["Media"],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "mediaUid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{eventId}/media/{mediaUid}/metadata": {
+      "get": {
+        "tags": ["Media"],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "mediaUid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMediaEntry"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{eventId}/media/{mediaUid}": {
+      "delete": {
+        "tags": ["Media"],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "mediaUid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/media/metadata": {
+      "get": {
+        "tags": ["Media"],
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "createdDateStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdDateEnd",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "mediaType",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/MediaType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetMediaEntry"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/participants": {
       "get": {
         "tags": ["Participant"],
@@ -2683,8 +3011,30 @@
   },
   "components": {
     "schemas": {
+      "FileType": {
+        "enum": [
+          "Jpg",
+          "Jpeg",
+          "Png",
+          "Pdf",
+          "Txt",
+          "Doc",
+          "Docx",
+          "Xls",
+          "Xlsx"
+        ],
+        "type": "string"
+      },
       "GetEventEntry": {
-        "required": ["eventDateStart", "name", "user", "userId"],
+        "required": [
+          "createdDate",
+          "eventDateStart",
+          "id",
+          "isCompleted",
+          "name",
+          "user",
+          "userId"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -2718,9 +3068,6 @@
           "isCompleted": {
             "type": "boolean"
           },
-          "isActive": {
-            "type": "boolean"
-          },
           "user": {
             "$ref": "#/components/schemas/GetUserEntry"
           },
@@ -2735,6 +3082,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/GetShoppingEntry"
+            },
+            "nullable": true
+          },
+          "medias": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetMediaEntry"
             },
             "nullable": true
           }
@@ -2762,16 +3116,40 @@
         },
         "additionalProperties": false
       },
-      "GetParticipantEntry": {
-        "required": ["event", "user"],
+      "GetMediaEntry": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "isActive": {
-            "type": "boolean"
+          "fileType": {
+            "$ref": "#/components/schemas/FileType"
+          },
+          "mediaUid": {
+            "type": "string",
+            "nullable": true
+          },
+          "mediaType": {
+            "$ref": "#/components/schemas/MediaType"
+          },
+          "link": {
+            "type": "string",
+            "nullable": true
+          },
+          "event": {
+            "$ref": "#/components/schemas/GetEventEntry"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetParticipantEntry": {
+        "required": ["event", "id", "user"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
           },
           "user": {
             "$ref": "#/components/schemas/GetUserEntry"
@@ -2818,7 +3196,7 @@
         "additionalProperties": false
       },
       "GetPurchaseEntry": {
-        "required": ["cost", "name", "shopping", "unitType"],
+        "required": ["cost", "id", "name", "shopping", "unitType"],
         "type": "object",
         "properties": {
           "id": {
@@ -2840,9 +3218,6 @@
           "count": {
             "type": "integer",
             "format": "int32"
-          },
-          "isActive": {
-            "type": "boolean"
           },
           "shopping": {
             "$ref": "#/components/schemas/GetShoppingEntry"
@@ -2889,7 +3264,7 @@
         "additionalProperties": false
       },
       "GetPurchaseTagEntry": {
-        "required": ["name"],
+        "required": ["id", "name"],
         "type": "object",
         "properties": {
           "id": {
@@ -2899,9 +3274,6 @@
           "name": {
             "minLength": 1,
             "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
           },
           "purchases": {
             "type": "array",
@@ -2935,7 +3307,7 @@
         "additionalProperties": false
       },
       "GetPurchaseUsageEntry": {
-        "required": ["participant", "purchase"],
+        "required": ["id", "participant", "purchase"],
         "type": "object",
         "properties": {
           "id": {
@@ -2973,7 +3345,13 @@
         "additionalProperties": false
       },
       "GetShoppingEntry": {
-        "required": ["description", "event", "participant", "shoppingDate"],
+        "required": [
+          "description",
+          "event",
+          "id",
+          "participant",
+          "shoppingDate"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -2991,9 +3369,6 @@
           "description": {
             "minLength": 1,
             "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
           },
           "event": {
             "$ref": "#/components/schemas/GetEventEntry"
@@ -3033,7 +3408,7 @@
         "additionalProperties": false
       },
       "GetUnitTypeEntry": {
-        "required": ["name"],
+        "required": ["id", "name"],
         "type": "object",
         "properties": {
           "id": {
@@ -3043,9 +3418,6 @@
           "name": {
             "minLength": 1,
             "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
           },
           "purchases": {
             "type": "array",
@@ -3135,6 +3507,10 @@
         },
         "additionalProperties": false
       },
+      "MediaType": {
+        "enum": ["Image", "Video", "Audio", "Document", "Link", "Unknown"],
+        "type": "string"
+      },
       "RegisterModel": {
         "required": ["email", "firstName", "password", "username"],
         "type": "object",
@@ -3177,7 +3553,7 @@
         "additionalProperties": false
       },
       "UpsertEventEntry": {
-        "required": ["eventDateStart", "name", "userId"],
+        "required": ["eventDateStart", "isCompleted", "name", "userId"],
         "type": "object",
         "properties": {
           "name": {

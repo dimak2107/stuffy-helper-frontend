@@ -1,6 +1,6 @@
 import { Api } from "./__generated__/api";
 
-const api = new Api();
+const api = new Api({ headers: { "Content-Type": "application/json" } });
 
 function addInterceptor(token: string) {
   api.instance.interceptors.request.use(
