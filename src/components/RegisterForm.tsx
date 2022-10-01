@@ -2,9 +2,9 @@ import { useState } from "react";
 import React from "react";
 import axios from "axios";
 import { useMutation } from "react-query";
-import "./register.css";
-import api, { addInterceptor } from "./api/myApi";
-import { LoginModel } from "./api/__generated__/api";
+import "./RegisterForm.module.css";
+import api, { addInterceptor } from "../api/myApi";
+import { LoginModel } from "../api/__generated__/api";
 
 // const [token, setToken] = useState("");
 const axiosApiInstance = axios.create();

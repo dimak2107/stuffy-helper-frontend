@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import React from "react";
 import axios from "axios";
 import { useMutation } from "react-query";
-import "./login.css";
-import api, { addInterceptor } from "./api/myApi";
-import { LoginModel } from "./api/__generated__/api";
+import "./LoginForm.module.css";
+import api, { addInterceptor } from "../api/myApi";
+import { LoginModel } from "../api/__generated__/api";
+import useAuth from "./AuthProvider";
 
 // const [token, setToken] = useState("");
 const axiosApiInstance = axios.create();
@@ -16,18 +17,12 @@ function Login() {
   const [token, setToken] = useState("");
 
   const [user, setUser] = useState(null);
-  function login(payload: LoginModel) {
-    return api.api.authLoginCreate(payload, {
-      headers: { "Content-Type": "application/json" },
-    });
-  }
 
-  function onSubmit(e: SubmitEvent) {
+  const auth = useAuth();
+
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    login({ username, password }).then((response) => {
-      setToken(response.headers.token);
-      addInterceptor(response.headers.token);
-    });
+    auth.login({ username, password });
   }
 
   const getEvents = api.api.eventsList;
@@ -43,7 +38,6 @@ function Login() {
                 type="text"
                 placeholder="username"
                 required
-                // pattern="^[a-zA-ZА-Яа-яЁё]{1}+[a-zA-ZА-ЯЁа-яё]{0,20}$"
                 value={username}
                 onChange={(uname) => setUsername(uname.target.value)}
               />
@@ -60,9 +54,7 @@ function Login() {
             </form>
           </>
         ) : (
-          <span className="material-text">
-            Login successed! {user?.username}
-          </span>
+          <span className="material-text">Login successed!</span>
         )}
         <button onClick={() => getEvents()}>Get events</button>
       </div>
