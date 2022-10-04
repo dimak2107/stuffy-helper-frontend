@@ -2,7 +2,6 @@ import { FormEvent, useState } from "react";
 import React from "react";
 import axios from "axios";
 import { useMutation } from "react-query";
-import "./RegisterForm.module.css";
 import api, { addInterceptor } from "../api/myApi";
 import { LoginModel, RegisterModel } from "../api/__generated__/api";
 import useAuth from "./AuthProvider";
@@ -33,95 +32,64 @@ function Register() {
       username: username,
       email: email,
       password: password,
-      firstName: firstname,
-      lastName: lastname,
-      middleName: middlename,
-      nickName: nickname,
-      phone: phone,
+      // firstName: firstname,
+      // lastName: lastname,
+      // middleName: middlename,
+      // nickName: nickname,
+      // phone: phone,
     };
     auth.register(payload);
   }
 
   return (
-    <form className="register-form" onSubmit={onSubmit}>
-      <input
-        type="text"
-        placeholder="username"
-        required
-        // pattern="^[a-zA-ZА-Яа-яЁё]{1}+[a-zA-ZА-ЯЁа-яё]{0,20}$"
-        value={username}
-        onChange={(uname) => setUsername(uname.target.value)}
-      />
-      <input
-        type="email"
-        placeholder="Email"
-        required
-        value={email}
-        onChange={(em) => setEmail(em.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="firstname"
-        required
-        // pattern="^[a-zA-ZА-Яа-яЁё]{1}+[a-zA-ZА-ЯЁа-яё]{0,20}$"
-        value={firstname}
-        onChange={(value) => setFirstname(value.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="phone"
-        // pattern="^[a-zA-ZА-Яа-яЁё]{1}+[a-zA-ZА-ЯЁа-яё]{0,20}$"
-        value={phone}
-        onChange={(value) => setPhone(value.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="lastname"
-        // pattern="^[a-zA-ZА-Яа-яЁё]{1}+[a-zA-ZА-ЯЁа-яё]{0,20}$"
-        value={lastname}
-        onChange={(value) => setLastName(value.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="middlename"
-        // pattern="^[a-zA-ZА-Яа-яЁё]{1}+[a-zA-ZА-ЯЁа-яё]{0,20}$"
-        value={middlename}
-        onChange={(value) => setMiddleName(value.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="nickname"
-        // pattern="^[a-zA-ZА-Яа-яЁё]{1}+[a-zA-ZА-ЯЁа-яё]{0,20}$"
-        value={nickname}
-        onChange={(value) => setNickname(value.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="password"
-        required
-        value={password}
-        onChange={(pass) => setPassword(pass.target.value)}
-      />
-      <label>
+    <form onSubmit={onSubmit} className="page__form">
+      <h1 className="form__header">Register page</h1>
+      <div className="form__inputs">
+        <input
+          className="input__style"
+          type="text"
+          placeholder="username"
+          required
+          // pattern="^[a-zA-ZА-Яа-яЁё]{1}+[a-zA-ZА-ЯЁа-яё]{0,20}$"
+          value={username}
+          onChange={(uname) => setUsername(uname.target.value)}
+        />
+        <input
+          className="input__style"
+          type="email"
+          placeholder="Email"
+          required
+          value={email}
+          onChange={(em) => setEmail(em.target.value)}
+        />
+
+        <input
+          className="input__style"
+          type="password"
+          placeholder="password"
+          required
+          value={password}
+          onChange={(pass) => setPassword(pass.target.value)}
+        />
+
+        <label className="agreement">
+          <input type="checkbox" className="check"></input>I would like to
+          receive your newsletter and other promotional information.
+        </label>
+      </div>
+
+      <div className="page__btn">
+        <button className="btn" type="submit" disabled={auth.loading}>
+          Sign Up
+        </button>
+      </div>
+      {/* <label>
         <img
           className="show-pass"
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSllDX4qAdJGzeGcnjp_ZvXwy0l7nI9IV7LYw&usqp=CAU"
           alt="showpass"
         />
-      </label>
-      <br></br>
-      <div className="info">
-        <input id="html" type="checkbox" className="check"></input>
-        <label className="agreement">
-          I would like to receive your newsletter and other promotional
-          information.
-        </label>
-      </div>
-
-      <br></br>
-      <button type="submit" disabled={auth.loading}>
-        Sign Up
-      </button>
+      </label> */}
     </form>
   );
 }

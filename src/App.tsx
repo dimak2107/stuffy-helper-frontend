@@ -1,12 +1,5 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
 import "./App.css";
-import { Button } from "@mui/material";
-import { Input } from "@mui/material";
-import { TextField } from "@mui/material";
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import RootPage from "./pages/RootPage";

@@ -9,6 +9,11 @@
  * ---------------------------------------------------------------
  */
 
+export interface ErrorResponse {
+  message?: string | null;
+  errors?: Record<string, string[]>;
+}
+
 export enum FileType {
   Jpg = "Jpg",
   Jpeg = "Jpeg",
@@ -193,8 +198,14 @@ export interface GetUserEntry {
   firstName?: string | null;
   middleName?: string | null;
   lastName?: string | null;
-  nickName?: string | null;
   phone?: string | null;
+}
+
+export interface IdentityRole {
+  id?: string | null;
+  name?: string | null;
+  normalizedName?: string | null;
+  concurrencyStamp?: string | null;
 }
 
 export interface LoginModel {
@@ -217,13 +228,6 @@ export interface RegisterModel {
   /** @format email */
   email: string;
   password: string;
-  firstName: string;
-  middleName?: string | null;
-  lastName?: string | null;
-  nickName?: string | null;
-
-  /** @format tel */
-  phone?: string | null;
 }
 
 export interface UpsertEventEntry {
@@ -300,11 +304,29 @@ export interface UpsertUnitTypeEntry {
   isActive?: boolean;
 }
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
+export interface UserEntry {
+  id?: string | null;
+  name?: string | null;
+  email?: string | null;
+  role?: string | null;
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
+}
+
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  HeadersDefaults,
+  ResponseType,
+} from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
 
-export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
+export interface FullRequestParams
+  extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -319,11 +341,15 @@ export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "pa
   body?: unknown;
 }
 
-export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
+export type RequestParams = Omit<
+  FullRequestParams,
+  "body" | "method" | "query" | "path"
+>;
 
-export interface ApiConfig<SecurityDataType = unknown> extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+export interface ApiConfig<SecurityDataType = unknown>
+  extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
   securityWorker?: (
-    securityData: SecurityDataType | null,
+    securityData: SecurityDataType | null
   ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
   secure?: boolean;
   format?: ResponseType;
@@ -342,8 +368,16 @@ export class HttpClient<SecurityDataType = unknown> {
   private secure?: boolean;
   private format?: ResponseType;
 
-  constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-    this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "" });
+  constructor({
+    securityWorker,
+    secure,
+    format,
+    ...axiosConfig
+  }: ApiConfig<SecurityDataType> = {}) {
+    this.instance = axios.create({
+      ...axiosConfig,
+      baseURL: axiosConfig.baseURL || "",
+    });
     this.secure = secure;
     this.format = format;
     this.securityWorker = securityWorker;
@@ -353,7 +387,10 @@ export class HttpClient<SecurityDataType = unknown> {
     this.securityData = data;
   };
 
-  protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
+  protected mergeRequestParams(
+    params1: AxiosRequestConfig,
+    params2?: AxiosRequestConfig
+  ): AxiosRequestConfig {
     const method = params1.method || (params2 && params2.method);
 
     return {
@@ -361,7 +398,11 @@ export class HttpClient<SecurityDataType = unknown> {
       ...params1,
       ...(params2 || {}),
       headers: {
-        ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
+        ...((method &&
+          this.instance.defaults.headers[
+            method.toLowerCase() as keyof HeadersDefaults
+          ]) ||
+          {}),
         ...(params1.headers || {}),
         ...((params2 && params2.headers) || {}),
       },
@@ -379,11 +420,15 @@ export class HttpClient<SecurityDataType = unknown> {
   protected createFormData(input: Record<string, unknown>): FormData {
     return Object.keys(input || {}).reduce((formData, key) => {
       const property = input[key];
-      const propertyContent: Iterable<any> = property instanceof Array ? property : [property];
+      const propertyContent: Iterable<any> =
+        property instanceof Array ? property : [property];
 
       for (const formItem of propertyContent) {
         const isFileType = formItem instanceof Blob || formItem instanceof File;
-        formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
+        formData.append(
+          key,
+          isFileType ? formItem : this.stringifyFormItem(formItem)
+        );
       }
 
       return formData;
@@ -396,7 +441,7 @@ export class HttpClient<SecurityDataType = unknown> {
           ? property
           : typeof property === "object" && property !== null
           ? JSON.stringify(property)
-          : `${property}`,
+          : `${property}`
       );
       return formData;
     }, new FormData());
@@ -419,14 +464,21 @@ export class HttpClient<SecurityDataType = unknown> {
     const requestParams = this.mergeRequestParams(params, secureParams);
     const responseFormat = format || this.format || undefined;
 
-    if (type === ContentType.FormData && body && body !== null && typeof body === "object") {
+    if (
+      type === ContentType.FormData &&
+      body &&
+      body !== null &&
+      typeof body === "object"
+    ) {
       body = this.createFormData(body as Record<string, unknown>);
     }
 
     return this.instance.request({
       ...requestParams,
       headers: {
-        ...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
+        ...(type && type !== ContentType.FormData
+          ? { "Content-Type": type }
+          : {}),
         ...(requestParams.headers || {}),
       },
       params: query,
@@ -441,7 +493,9 @@ export class HttpClient<SecurityDataType = unknown> {
  * @title StuffyHelper.Hosting
  * @version 1.0
  */
-export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+export class Api<
+  SecurityDataType extends unknown
+> extends HttpClient<SecurityDataType> {
   api = {
     /**
      * No description
@@ -452,12 +506,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     authRegisterCreate: (data: RegisterModel, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<GetUserEntry, ErrorResponse>({
         path: `/api/auth/register`,
         method: "POST",
         body: data,
         secure: true,
         type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -470,12 +525,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     authLoginCreate: (data: LoginModel, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<GetUserEntry, ErrorResponse>({
         path: `/api/auth/login`,
         method: "POST",
         body: data,
         secure: true,
         type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -504,10 +560,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     authRolesList: (params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<IdentityRole, ErrorResponse>({
         path: `/api/auth/roles`,
         method: "GET",
         secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -520,10 +577,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     authIsAdminList: (params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<boolean, ErrorResponse>({
         path: `/api/auth/is-admin`,
         method: "GET",
         secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -536,10 +594,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     authAccountList: (params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<GetUserEntry, ErrorResponse>({
         path: `/api/auth/account`,
         method: "GET",
         secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -551,12 +610,45 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/auth/users
      * @secure
      */
-    authUsersList: (query?: { userName?: string }, params: RequestParams = {}) =>
-      this.request<void, any>({
+    authUsersList: (
+      query?: { userName?: string },
+      params: RequestParams = {}
+    ) =>
+      this.request<UserEntry[], ErrorResponse>({
         path: `/api/auth/users`,
         method: "GET",
         query: query,
         secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Authorization
+     * @name AuthEditPartialUpdate
+     * @request PATCH:/api/auth/edit
+     * @secure
+     */
+    authEditPartialUpdate: (
+      query: {
+        Username: string;
+        Email?: string;
+        Password?: string;
+        FirstName?: string;
+        MiddleName?: string;
+        LastName?: string;
+        Phone?: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<UserEntry, ErrorResponse>({
+        path: `/api/auth/edit`,
+        method: "PATCH",
+        query: query,
+        secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -586,9 +678,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         participantId?: string;
         shoppingId?: string;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
-      this.request<GetEventEntryResponse, string | void>({
+      this.request<GetEventEntryResponse, ErrorResponse | void>({
         path: `/api/events`,
         method: "GET",
         query: query,
@@ -606,7 +698,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     eventsCreate: (data: UpsertEventEntry, params: RequestParams = {}) =>
-      this.request<GetEventEntry, string>({
+      this.request<GetEventEntry, ErrorResponse>({
         path: `/api/events`,
         method: "POST",
         body: data,
@@ -625,7 +717,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     eventsDetail: (eventId: string, params: RequestParams = {}) =>
-      this.request<GetEventEntry, string | void>({
+      this.request<GetEventEntry, ErrorResponse | void>({
         path: `/api/events/${eventId}`,
         method: "GET",
         secure: true,
@@ -642,7 +734,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     eventsDelete: (eventId: string, params: RequestParams = {}) =>
-      this.request<void, string>({
+      this.request<void, ErrorResponse>({
         path: `/api/events/${eventId}`,
         method: "DELETE",
         secure: true,
@@ -657,8 +749,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request PATCH:/api/events/{eventId}
      * @secure
      */
-    eventsPartialUpdate: (eventId: string, data: UpsertEventEntry, params: RequestParams = {}) =>
-      this.request<GetEventEntry, string>({
+    eventsPartialUpdate: (
+      eventId: string,
+      data: UpsertEventEntry,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetEventEntry, ErrorResponse>({
         path: `/api/events/${eventId}`,
         method: "PATCH",
         body: data,
@@ -680,9 +776,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       eventId: string,
       query: { mediaType: MediaType; link?: string },
       data: { file?: File },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
-      this.request<GetMediaEntry, string>({
+      this.request<GetMediaEntry, ErrorResponse>({
         path: `/api/events/${eventId}/media/form-file`,
         method: "POST",
         query: query,
@@ -701,8 +797,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/events/{eventId}/media/{mediaUid}/form-file
      * @secure
      */
-    eventsMediaFormFileDetail: (eventId: string, mediaUid: string, params: RequestParams = {}) =>
-      this.request<void, string>({
+    eventsMediaFormFileDetail: (
+      eventId: string,
+      mediaUid: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, ErrorResponse>({
         path: `/api/events/${eventId}/media/${mediaUid}/form-file`,
         method: "GET",
         secure: true,
@@ -717,8 +817,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/events/{eventId}/media/{mediaUid}/metadata
      * @secure
      */
-    eventsMediaMetadataDetail: (eventId: string, mediaUid: string, params: RequestParams = {}) =>
-      this.request<GetMediaEntry, string>({
+    eventsMediaMetadataDetail: (
+      eventId: string,
+      mediaUid: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetMediaEntry, ErrorResponse>({
         path: `/api/events/${eventId}/media/${mediaUid}/metadata`,
         method: "GET",
         secure: true,
@@ -734,8 +838,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request DELETE:/api/events/{eventId}/media/{mediaUid}
      * @secure
      */
-    eventsMediaDelete: (eventId: string, mediaUid: string, params: RequestParams = {}) =>
-      this.request<void, string>({
+    eventsMediaDelete: (
+      eventId: string,
+      mediaUid: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, ErrorResponse>({
         path: `/api/events/${eventId}/media/${mediaUid}`,
         method: "DELETE",
         secure: true,
@@ -759,9 +867,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         createdDateEnd?: string;
         mediaType?: MediaType;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
-      this.request<GetMediaEntry[], string>({
+      this.request<GetMediaEntry[], ErrorResponse>({
         path: `/api/media/metadata`,
         method: "GET",
         query: query,
@@ -779,10 +887,16 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     participantsList: (
-      query?: { offset?: number; limit?: number; eventId?: string; userId?: string; isActive?: boolean },
-      params: RequestParams = {},
+      query?: {
+        offset?: number;
+        limit?: number;
+        eventId?: string;
+        userId?: string;
+        isActive?: boolean;
+      },
+      params: RequestParams = {}
     ) =>
-      this.request<GetParticipantEntryResponse, string | void>({
+      this.request<GetParticipantEntryResponse, ErrorResponse | void>({
         path: `/api/participants`,
         method: "GET",
         query: query,
@@ -799,8 +913,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/participants
      * @secure
      */
-    participantsCreate: (data: UpsertParticipantEntry, params: RequestParams = {}) =>
-      this.request<GetParticipantEntry, string>({
+    participantsCreate: (
+      data: UpsertParticipantEntry,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetParticipantEntry, ErrorResponse>({
         path: `/api/participants`,
         method: "POST",
         body: data,
@@ -819,7 +936,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     participantsDetail: (participantId: string, params: RequestParams = {}) =>
-      this.request<GetParticipantEntry, string | void>({
+      this.request<GetParticipantEntry, ErrorResponse | void>({
         path: `/api/participants/${participantId}`,
         method: "GET",
         secure: true,
@@ -836,7 +953,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     participantsDelete: (participantId: string, params: RequestParams = {}) =>
-      this.request<void, string>({
+      this.request<void, ErrorResponse>({
         path: `/api/participants/${participantId}`,
         method: "DELETE",
         secure: true,
@@ -851,8 +968,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request PATCH:/api/participants/{participantId}
      * @secure
      */
-    participantsPartialUpdate: (participantId: string, data: UpsertParticipantEntry, params: RequestParams = {}) =>
-      this.request<GetParticipantEntry, string>({
+    participantsPartialUpdate: (
+      participantId: string,
+      data: UpsertParticipantEntry,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetParticipantEntry, ErrorResponse>({
         path: `/api/participants/${participantId}`,
         method: "PATCH",
         body: data,
@@ -886,9 +1007,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         unitTypeId?: string;
         isActive?: boolean;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseEntryResponse, string | void>({
+      this.request<GetPurchaseEntryResponse, ErrorResponse | void>({
         path: `/api/purchases`,
         method: "GET",
         query: query,
@@ -906,7 +1027,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     purchasesCreate: (data: UpsertPurchaseEntry, params: RequestParams = {}) =>
-      this.request<GetPurchaseEntry, string>({
+      this.request<GetPurchaseEntry, ErrorResponse>({
         path: `/api/purchases`,
         method: "POST",
         body: data,
@@ -925,7 +1046,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     purchasesDetail: (purchaseId: string, params: RequestParams = {}) =>
-      this.request<GetPurchaseEntry, string | void>({
+      this.request<GetPurchaseEntry, ErrorResponse | void>({
         path: `/api/purchases/${purchaseId}`,
         method: "GET",
         secure: true,
@@ -942,7 +1063,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     purchasesDelete: (purchaseId: string, params: RequestParams = {}) =>
-      this.request<void, string>({
+      this.request<void, ErrorResponse>({
         path: `/api/purchases/${purchaseId}`,
         method: "DELETE",
         secure: true,
@@ -957,8 +1078,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request PATCH:/api/purchases/{purchaseId}
      * @secure
      */
-    purchasesPartialUpdate: (purchaseId: string, data: UpsertPurchaseEntry, params: RequestParams = {}) =>
-      this.request<GetPurchaseEntry, string>({
+    purchasesPartialUpdate: (
+      purchaseId: string,
+      data: UpsertPurchaseEntry,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetPurchaseEntry, ErrorResponse>({
         path: `/api/purchases/${purchaseId}`,
         method: "PATCH",
         body: data,
@@ -977,10 +1102,16 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     purchaseTagsList: (
-      query?: { offset?: number; limit?: number; name?: string; purchaseId?: string; isActive?: boolean },
-      params: RequestParams = {},
+      query?: {
+        offset?: number;
+        limit?: number;
+        name?: string;
+        purchaseId?: string;
+        isActive?: boolean;
+      },
+      params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseTagEntryResponse, string | void>({
+      this.request<GetPurchaseTagEntryResponse, ErrorResponse | void>({
         path: `/api/purchase-tags`,
         method: "GET",
         query: query,
@@ -997,8 +1128,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/purchase-tags
      * @secure
      */
-    purchaseTagsCreate: (data: UpsertPurchaseTagEntry, params: RequestParams = {}) =>
-      this.request<GetPurchaseTagEntry, string>({
+    purchaseTagsCreate: (
+      data: UpsertPurchaseTagEntry,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetPurchaseTagEntry, ErrorResponse>({
         path: `/api/purchase-tags`,
         method: "POST",
         body: data,
@@ -1017,7 +1151,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     purchaseTagsDetail: (purchaseTagId: string, params: RequestParams = {}) =>
-      this.request<GetPurchaseTagEntry, string | void>({
+      this.request<GetPurchaseTagEntry, ErrorResponse | void>({
         path: `/api/purchase-tags/${purchaseTagId}`,
         method: "GET",
         secure: true,
@@ -1034,7 +1168,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     purchaseTagsDelete: (purchaseTagId: string, params: RequestParams = {}) =>
-      this.request<void, string>({
+      this.request<void, ErrorResponse>({
         path: `/api/purchase-tags/${purchaseTagId}`,
         method: "DELETE",
         secure: true,
@@ -1049,8 +1183,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request PATCH:/api/purchase-tags/{purchaseTagId}
      * @secure
      */
-    purchaseTagsPartialUpdate: (purchaseTagId: string, data: UpsertPurchaseTagEntry, params: RequestParams = {}) =>
-      this.request<GetPurchaseTagEntry, string>({
+    purchaseTagsPartialUpdate: (
+      purchaseTagId: string,
+      data: UpsertPurchaseTagEntry,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetPurchaseTagEntry, ErrorResponse>({
         path: `/api/purchase-tags/${purchaseTagId}`,
         method: "PATCH",
         body: data,
@@ -1069,10 +1207,15 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     purchaseUsagesList: (
-      query?: { offset?: number; limit?: number; participantId?: string; purchaseId?: string },
-      params: RequestParams = {},
+      query?: {
+        offset?: number;
+        limit?: number;
+        participantId?: string;
+        purchaseId?: string;
+      },
+      params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseUsageEntryResponse, string | void>({
+      this.request<GetPurchaseUsageEntryResponse, ErrorResponse | void>({
         path: `/api/purchase-usages`,
         method: "GET",
         query: query,
@@ -1089,8 +1232,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/purchase-usages
      * @secure
      */
-    purchaseUsagesCreate: (data: UpsertPurchaseUsageEntry, params: RequestParams = {}) =>
-      this.request<GetPurchaseUsageEntry, string>({
+    purchaseUsagesCreate: (
+      data: UpsertPurchaseUsageEntry,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetPurchaseUsageEntry, ErrorResponse>({
         path: `/api/purchase-usages`,
         method: "POST",
         body: data,
@@ -1108,8 +1254,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/purchase-usages/{purchaseUsageId}
      * @secure
      */
-    purchaseUsagesDetail: (purchaseUsageId: string, params: RequestParams = {}) =>
-      this.request<GetPurchaseUsageEntry, string | void>({
+    purchaseUsagesDetail: (
+      purchaseUsageId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetPurchaseUsageEntry, ErrorResponse | void>({
         path: `/api/purchase-usages/${purchaseUsageId}`,
         method: "GET",
         secure: true,
@@ -1125,8 +1274,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request DELETE:/api/purchase-usages/{purchaseUsageId}
      * @secure
      */
-    purchaseUsagesDelete: (purchaseUsageId: string, params: RequestParams = {}) =>
-      this.request<void, string>({
+    purchaseUsagesDelete: (
+      purchaseUsageId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, ErrorResponse>({
         path: `/api/purchase-usages/${purchaseUsageId}`,
         method: "DELETE",
         secure: true,
@@ -1144,9 +1296,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     purchaseUsagesPartialUpdate: (
       purchaseUsageId: string,
       data: UpsertPurchaseUsageEntry,
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseUsageEntry, string>({
+      this.request<GetPurchaseUsageEntry, ErrorResponse>({
         path: `/api/purchase-usages/${purchaseUsageId}`,
         method: "PATCH",
         body: data,
@@ -1175,9 +1327,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         description?: string;
         isActive?: boolean;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
-      this.request<GetShoppingEntryResponse, string | void>({
+      this.request<GetShoppingEntryResponse, ErrorResponse | void>({
         path: `/api/shoppings`,
         method: "GET",
         query: query,
@@ -1195,7 +1347,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     shoppingsCreate: (data: UpsertShoppingEntry, params: RequestParams = {}) =>
-      this.request<GetShoppingEntry, string>({
+      this.request<GetShoppingEntry, ErrorResponse>({
         path: `/api/shoppings`,
         method: "POST",
         body: data,
@@ -1214,7 +1366,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     shoppingsDetail: (shoppingId: string, params: RequestParams = {}) =>
-      this.request<GetShoppingEntry, string | void>({
+      this.request<GetShoppingEntry, ErrorResponse | void>({
         path: `/api/shoppings/${shoppingId}`,
         method: "GET",
         secure: true,
@@ -1231,7 +1383,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     shoppingsDelete: (shoppingId: string, params: RequestParams = {}) =>
-      this.request<void, string>({
+      this.request<void, ErrorResponse>({
         path: `/api/shoppings/${shoppingId}`,
         method: "DELETE",
         secure: true,
@@ -1246,8 +1398,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request PATCH:/api/shoppings/{shoppingId}
      * @secure
      */
-    shoppingsPartialUpdate: (shoppingId: string, data: UpsertShoppingEntry, params: RequestParams = {}) =>
-      this.request<GetShoppingEntry, string>({
+    shoppingsPartialUpdate: (
+      shoppingId: string,
+      data: UpsertShoppingEntry,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetShoppingEntry, ErrorResponse>({
         path: `/api/shoppings/${shoppingId}`,
         method: "PATCH",
         body: data,
@@ -1266,10 +1422,16 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     unitTypesList: (
-      query?: { offset?: number; limit?: number; name?: string; purchaseId?: string; isActive?: boolean },
-      params: RequestParams = {},
+      query?: {
+        offset?: number;
+        limit?: number;
+        name?: string;
+        purchaseId?: string;
+        isActive?: boolean;
+      },
+      params: RequestParams = {}
     ) =>
-      this.request<GetUnitTypeEntryResponse, string | void>({
+      this.request<GetUnitTypeEntryResponse, ErrorResponse | void>({
         path: `/api/unit-types`,
         method: "GET",
         query: query,
@@ -1287,7 +1449,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     unitTypesCreate: (data: UpsertUnitTypeEntry, params: RequestParams = {}) =>
-      this.request<GetUnitTypeEntry, string>({
+      this.request<GetUnitTypeEntry, ErrorResponse>({
         path: `/api/unit-types`,
         method: "POST",
         body: data,
@@ -1306,7 +1468,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     unitTypesDetail: (unitTypeId: string, params: RequestParams = {}) =>
-      this.request<GetUnitTypeEntry, string | void>({
+      this.request<GetUnitTypeEntry, ErrorResponse | void>({
         path: `/api/unit-types/${unitTypeId}`,
         method: "GET",
         secure: true,
@@ -1323,7 +1485,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     unitTypesDelete: (unitTypeId: string, params: RequestParams = {}) =>
-      this.request<void, string>({
+      this.request<void, ErrorResponse>({
         path: `/api/unit-types/${unitTypeId}`,
         method: "DELETE",
         secure: true,
@@ -1338,8 +1500,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request PATCH:/api/unit-types/{unitTypeId}
      * @secure
      */
-    unitTypesPartialUpdate: (unitTypeId: string, data: UpsertUnitTypeEntry, params: RequestParams = {}) =>
-      this.request<GetUnitTypeEntry, string>({
+    unitTypesPartialUpdate: (
+      unitTypeId: string,
+      data: UpsertUnitTypeEntry,
+      params: RequestParams = {}
+    ) =>
+      this.request<GetUnitTypeEntry, ErrorResponse>({
         path: `/api/unit-types/${unitTypeId}`,
         method: "PATCH",
         body: data,

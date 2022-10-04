@@ -1,7 +1,7 @@
 function RootPage() {
   return (
-    <div className="root-page">
-      <h1>Главная страница</h1>
+    <div className="page">
+      <h1 className="page__header">Главная страница</h1>
     </div>
   );
 }

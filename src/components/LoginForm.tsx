@@ -1,6 +1,5 @@
 import { FormEvent, useState } from "react";
 import axios from "axios";
-import "./LoginForm.module.css";
 import api from "../api/myApi";
 import useAuth from "./AuthProvider";
 
@@ -20,10 +19,11 @@ function Login() {
   const getEvents = api.api.eventsList;
 
   return (
-    <>
-      <span className="material-text">Авторизация</span>
-      <form className="login-form" onSubmit={onSubmit}>
+    <form className="page__form" onSubmit={onSubmit}>
+      <h1 className="form__header">Login Page</h1>
+      <div className="form__inputs">
         <input
+          className="input__style"
           type="text"
           placeholder="username"
           required
@@ -31,17 +31,21 @@ function Login() {
           onChange={(uname) => setUsername(uname.target.value)}
         />
         <input
+          className="input__style"
           type="password"
           placeholder="password"
           required
           value={password}
           onChange={(pass) => setPassword(pass.target.value)}
         />
-        <button type="submit" disabled={auth.loading}>
-          login
+      </div>
+
+      <div className="page__btn">
+        <button className="btn" type="submit" disabled={auth.loading}>
+          Login
         </button>
-      </form>
-    </>
+      </div>
+    </form>
   );
 }
 

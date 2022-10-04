@@ -1,9 +1,10 @@
 import LoginForm from "../components/LoginForm";
 function LoginPage() {
   return (
-    <div className="login-page">
-      <h1>loginPage</h1>
-      <LoginForm />
+    <div className="page">
+      <div className="page__center-content">
+        <LoginForm />
+      </div>
     </div>
   );
 }
