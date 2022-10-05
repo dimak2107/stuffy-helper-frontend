@@ -1,0 +1,7 @@
+.events__list ul {
+  list-style: none;
+}
+
+.events__list ul li {
+  border-bottom: 1px solid #e8e8e8;
+}

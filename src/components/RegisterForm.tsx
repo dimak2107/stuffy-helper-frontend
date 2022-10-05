@@ -14,11 +14,11 @@ function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [firstname, setFirstname] = useState("");
-  const [phone, setPhone] = useState("");
-  const [lastname, setLastName] = useState("");
-  const [middlename, setMiddleName] = useState("");
-  const [nickname, setNickname] = useState("");
+  // const [firstname, setFirstname] = useState("");
+  // const [phone, setPhone] = useState("");
+  // const [lastname, setLastName] = useState("");
+  // const [middlename, setMiddleName] = useState("");
+  // const [nickname, setNickname] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // const [user, setUser] = useState(null);

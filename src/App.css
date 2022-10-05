@@ -20,7 +20,7 @@
   flex-direction: column;
   min-height: 100vh;
   padding: 16px;
-  background: linear-gradient(50deg, lightgrey, lightgreen);
+  /* background: linear-gradient(50deg, lightgrey, lightgreen); */
 }
 
 .page__center-content {

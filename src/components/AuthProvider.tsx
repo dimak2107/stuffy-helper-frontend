@@ -41,11 +41,18 @@ export function AuthProvider({
   // router of your choice.
   const navigate = useNavigate();
   const location = useLocation();
-
+  // const [token, setToken] = useState(localStorage.getItem("token"));
   // If we change page, reset the error state.
   useEffect(() => {
     if (error) setError(null);
   }, [location.pathname]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return;
+    }
+    addInterceptor(token);
+  }, []);
 
   // Check if there is a currently active session
   // when the provider is mounted for the first time.
@@ -67,6 +74,7 @@ export function AuthProvider({
       .then((response) => {
         // setToken(response.headers.token);
         addInterceptor(response.headers.token);
+        localStorage.setItem("token", `${response.headers.token}`);
         navigate("/");
         // history.push("/");
       })
