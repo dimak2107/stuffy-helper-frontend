@@ -59,6 +59,7 @@
 }
 
 .page__btn {
+  padding: 16px;
   background: transparent;
   display: flex;
   flex-direction: column;
@@ -84,12 +85,10 @@
 }
 
 .input__style {
-  background: whitesmoke;
+  /* background: whitesmoke; */
   width: 100%;
-  margin-bottom: 24px;
-  font-family: "Times New Roman", Times, serif;
+  margin-bottom: 48px;
   font-size: 16px;
-  font-style: italic;
   display: block;
 }
 

@@ -5,3 +5,7 @@
 .events__list ul li {
   border-bottom: 1px solid #e8e8e8;
 }
+
+.events__search-bar {
+  padding: 16px 0;
+}

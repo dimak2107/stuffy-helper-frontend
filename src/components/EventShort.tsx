@@ -1,10 +1,10 @@
-import { FC } from "react";
 import { GetEventEntry } from "../api/__generated__/api";
 import "./EventShort.css";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ru";
+import { Link } from "react-router-dom";
 
 dayjs.extend(utc);
 dayjs.extend(relativeTime);
@@ -20,12 +20,13 @@ const EventShort = ({ eventShort }: EventShortProps) => {
 
   return (
     <div className="event-short">
-      <div className="event-short__top">
-        <h2 className="event-short__title">{eventShort.name}</h2>
-        <div className="event-short__time">{formatDate()}</div>
-      </div>
-
-      <div className="event-short__desc">{eventShort.description}</div>
+      <Link to={`/events/${eventShort.id}`}>
+        <div className="event-short__top">
+          <h2 className="event-short__title">{eventShort.name}</h2>
+          <div className="event-short__time">{formatDate()}</div>
+        </div>
+        <div className="event-short__desc">{eventShort.description}</div>
+      </Link>
     </div>
   );
 };
