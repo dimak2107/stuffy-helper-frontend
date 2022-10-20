@@ -14,6 +14,30 @@ export interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
+export interface EventShortEntry {
+  /** @format uuid */
+  id: string;
+  name: string;
+  description?: string | null;
+
+  /** @format date-time */
+  eventDateStart: string;
+  isCompleted: boolean;
+
+  /** @format uri */
+  imageUri?: string | null;
+}
+
+export interface EventShortEntryResponse {
+  data?: EventShortEntry[] | null;
+
+  /** @format int32 */
+  totalPages?: number;
+
+  /** @format int32 */
+  total?: number;
+}
+
 export enum FileType {
   Jpg = "Jpg",
   Jpeg = "Jpeg",
@@ -39,52 +63,34 @@ export interface GetEventEntry {
   eventDateStart: string;
 
   /** @format date-time */
-  eventDateEnd?: string;
-  userId: string;
+  eventDateEnd?: string | null;
   isCompleted: boolean;
-  user: GetUserEntry;
-  participants?: GetParticipantEntry[] | null;
-  shoppings?: GetShoppingEntry[] | null;
-  medias?: GetMediaEntry[] | null;
-}
 
-export interface GetEventEntryResponse {
-  data?: GetEventEntry[] | null;
-
-  /** @format int32 */
-  totalPages?: number;
-
-  /** @format int32 */
-  total?: number;
+  /** @format uri */
+  mediaUri?: string | null;
+  user: UserShortEntry;
+  participants?: ParticipantShortEntry[] | null;
+  shoppings?: ShoppingShortEntry[] | null;
+  medias?: MediaShortEntry[] | null;
 }
 
 export interface GetMediaEntry {
   /** @format uuid */
   id?: string;
   fileType?: FileType;
-  mediaUid?: string | null;
+  fileName?: string | null;
   mediaType?: MediaType;
   link?: string | null;
-  event?: GetEventEntry;
+  event?: EventShortEntry;
 }
 
 export interface GetParticipantEntry {
   /** @format uuid */
   id: string;
-  user: GetUserEntry;
-  event: GetEventEntry;
-  shoppings?: GetShoppingEntry[] | null;
-  purchaseUsages?: GetPurchaseUsageEntry[] | null;
-}
-
-export interface GetParticipantEntryResponse {
-  data?: GetParticipantEntry[] | null;
-
-  /** @format int32 */
-  totalPages?: number;
-
-  /** @format int32 */
-  total?: number;
+  user: UserShortEntry;
+  event: EventShortEntry;
+  shoppings?: ShoppingShortEntry[] | null;
+  purchaseUsages?: PurchaseUsageShortEntry[] | null;
 }
 
 export interface GetPurchaseEntry {
@@ -100,54 +106,24 @@ export interface GetPurchaseEntry {
 
   /** @format int32 */
   count?: number;
-  shopping: GetShoppingEntry;
-  purchaseTags?: GetPurchaseTagEntry[] | null;
-  unitType: GetUnitTypeEntry;
-  purchaseUsages?: GetPurchaseUsageEntry[] | null;
-}
-
-export interface GetPurchaseEntryResponse {
-  data?: GetPurchaseEntry[] | null;
-
-  /** @format int32 */
-  totalPages?: number;
-
-  /** @format int32 */
-  total?: number;
+  shopping: ShoppingShortEntry;
+  purchaseTags?: PurchaseTagShortEntry[] | null;
+  unitType: UnitTypeShortEntry;
+  purchaseUsages?: PurchaseUsageShortEntry[] | null;
 }
 
 export interface GetPurchaseTagEntry {
   /** @format uuid */
   id: string;
   name: string;
-  purchases?: GetPurchaseEntry[] | null;
-}
-
-export interface GetPurchaseTagEntryResponse {
-  data?: GetPurchaseTagEntry[] | null;
-
-  /** @format int32 */
-  totalPages?: number;
-
-  /** @format int32 */
-  total?: number;
+  purchases?: PurchaseShortEntry[] | null;
 }
 
 export interface GetPurchaseUsageEntry {
   /** @format uuid */
   id: string;
-  participant: GetParticipantEntry;
-  purchase: GetPurchaseEntry;
-}
-
-export interface GetPurchaseUsageEntryResponse {
-  data?: GetPurchaseUsageEntry[] | null;
-
-  /** @format int32 */
-  totalPages?: number;
-
-  /** @format int32 */
-  total?: number;
+  participant: ParticipantShortEntry;
+  purchase: PurchaseShortEntry;
 }
 
 export interface GetShoppingEntry {
@@ -158,36 +134,16 @@ export interface GetShoppingEntry {
   shoppingDate: string;
   check?: string | null;
   description: string;
-  event: GetEventEntry;
-  participant: GetParticipantEntry;
-  purchases?: GetPurchaseEntry[] | null;
-}
-
-export interface GetShoppingEntryResponse {
-  data?: GetShoppingEntry[] | null;
-
-  /** @format int32 */
-  totalPages?: number;
-
-  /** @format int32 */
-  total?: number;
+  event: EventShortEntry;
+  participant: ParticipantShortEntry;
+  purchases?: PurchaseShortEntry[] | null;
 }
 
 export interface GetUnitTypeEntry {
   /** @format uuid */
   id: string;
   name: string;
-  purchases?: GetPurchaseEntry[] | null;
-}
-
-export interface GetUnitTypeEntryResponse {
-  data?: GetUnitTypeEntry[] | null;
-
-  /** @format int32 */
-  totalPages?: number;
-
-  /** @format int32 */
-  total?: number;
+  purchases?: PurchaseShortEntry[] | null;
 }
 
 export interface GetUserEntry {
@@ -213,6 +169,15 @@ export interface LoginModel {
   password: string;
 }
 
+export interface MediaShortEntry {
+  /** @format uuid */
+  id?: string;
+  fileType?: FileType;
+  fileName?: string | null;
+  mediaType?: MediaType;
+  link?: string | null;
+}
+
 export enum MediaType {
   Image = "Image",
   Video = "Video",
@@ -222,12 +187,123 @@ export enum MediaType {
   Unknown = "Unknown",
 }
 
+export interface ParticipantShortEntry {
+  /** @format uuid */
+  id: string;
+  name?: string | null;
+}
+
+export interface ParticipantShortEntryResponse {
+  data?: ParticipantShortEntry[] | null;
+
+  /** @format int32 */
+  totalPages?: number;
+
+  /** @format int32 */
+  total?: number;
+}
+
+export interface PurchaseShortEntry {
+  /** @format uuid */
+  id: string;
+  name: string;
+
+  /** @format double */
+  cost: number;
+
+  /** @format double */
+  weight?: number;
+
+  /** @format int32 */
+  count?: number;
+}
+
+export interface PurchaseShortEntryResponse {
+  data?: PurchaseShortEntry[] | null;
+
+  /** @format int32 */
+  totalPages?: number;
+
+  /** @format int32 */
+  total?: number;
+}
+
+export interface PurchaseTagShortEntry {
+  /** @format uuid */
+  id: string;
+  name: string;
+}
+
+export interface PurchaseTagShortEntryResponse {
+  data?: PurchaseTagShortEntry[] | null;
+
+  /** @format int32 */
+  totalPages?: number;
+
+  /** @format int32 */
+  total?: number;
+}
+
+export interface PurchaseUsageShortEntry {
+  /** @format uuid */
+  id: string;
+  userId?: string | null;
+  name?: string | null;
+  purchaseName?: string | null;
+}
+
+export interface PurchaseUsageShortEntryResponse {
+  data?: PurchaseUsageShortEntry[] | null;
+
+  /** @format int32 */
+  totalPages?: number;
+
+  /** @format int32 */
+  total?: number;
+}
+
 export interface RegisterModel {
   username: string;
 
   /** @format email */
   email: string;
   password: string;
+}
+
+export interface ShoppingShortEntry {
+  /** @format uuid */
+  id: string;
+
+  /** @format date-time */
+  shoppingDate: string;
+  check?: string | null;
+  description: string;
+}
+
+export interface ShoppingShortEntryResponse {
+  data?: ShoppingShortEntry[] | null;
+
+  /** @format int32 */
+  totalPages?: number;
+
+  /** @format int32 */
+  total?: number;
+}
+
+export interface UnitTypeShortEntry {
+  /** @format uuid */
+  id: string;
+  name: string;
+}
+
+export interface UnitTypeShortEntryResponse {
+  data?: UnitTypeShortEntry[] | null;
+
+  /** @format int32 */
+  totalPages?: number;
+
+  /** @format int32 */
+  total?: number;
 }
 
 export interface UpsertEventEntry {
@@ -240,8 +316,7 @@ export interface UpsertEventEntry {
   /** @format date-time */
   eventDateEnd?: string;
   isCompleted: boolean;
-  userId: string;
-  isActive?: boolean;
+  isActive: boolean;
 }
 
 export interface UpsertParticipantEntry {
@@ -313,6 +388,11 @@ export interface UserEntry {
   middleName?: string | null;
   lastName?: string | null;
   phone?: string | null;
+}
+
+export interface UserShortEntry {
+  id?: string | null;
+  name?: string | null;
 }
 
 import axios, {
@@ -680,7 +760,7 @@ export class Api<
       },
       params: RequestParams = {}
     ) =>
-      this.request<GetEventEntryResponse, ErrorResponse | void>({
+      this.request<EventShortEntryResponse, ErrorResponse | void>({
         path: `/api/events`,
         method: "GET",
         query: query,
@@ -697,13 +777,23 @@ export class Api<
      * @request POST:/api/events
      * @secure
      */
-    eventsCreate: (data: UpsertEventEntry, params: RequestParams = {}) =>
-      this.request<GetEventEntry, ErrorResponse>({
+    eventsCreate: (
+      query: {
+        name: string;
+        eventDateStart: string;
+        description?: string;
+        eventDateEnd?: string;
+      },
+      data: { file?: File },
+      params: RequestParams = {}
+    ) =>
+      this.request<EventShortEntry, ErrorResponse>({
         path: `/api/events`,
         method: "POST",
+        query: query,
         body: data,
         secure: true,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),
@@ -754,7 +844,7 @@ export class Api<
       data: UpsertEventEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetEventEntry, ErrorResponse>({
+      this.request<EventShortEntry, ErrorResponse>({
         path: `/api/events/${eventId}`,
         method: "PATCH",
         body: data,
@@ -793,17 +883,13 @@ export class Api<
      * No description
      *
      * @tags Media
-     * @name EventsMediaFormFileDetail
-     * @request GET:/api/events/{eventId}/media/{mediaUid}/form-file
+     * @name MediaFormFileDetail
+     * @request GET:/api/media/{mediaId}/form-file
      * @secure
      */
-    eventsMediaFormFileDetail: (
-      eventId: string,
-      mediaUid: string,
-      params: RequestParams = {}
-    ) =>
+    mediaFormFileDetail: (mediaId: string, params: RequestParams = {}) =>
       this.request<void, ErrorResponse>({
-        path: `/api/events/${eventId}/media/${mediaUid}/form-file`,
+        path: `/api/media/${mediaId}/form-file`,
         method: "GET",
         secure: true,
         ...params,
@@ -813,17 +899,13 @@ export class Api<
      * No description
      *
      * @tags Media
-     * @name EventsMediaMetadataDetail
-     * @request GET:/api/events/{eventId}/media/{mediaUid}/metadata
+     * @name MediaMetadataDetail
+     * @request GET:/api/media/{mediaId}/metadata
      * @secure
      */
-    eventsMediaMetadataDetail: (
-      eventId: string,
-      mediaUid: string,
-      params: RequestParams = {}
-    ) =>
+    mediaMetadataDetail: (mediaId: string, params: RequestParams = {}) =>
       this.request<GetMediaEntry, ErrorResponse>({
-        path: `/api/events/${eventId}/media/${mediaUid}/metadata`,
+        path: `/api/media/${mediaId}/metadata`,
         method: "GET",
         secure: true,
         format: "json",
@@ -834,17 +916,13 @@ export class Api<
      * No description
      *
      * @tags Media
-     * @name EventsMediaDelete
-     * @request DELETE:/api/events/{eventId}/media/{mediaUid}
+     * @name MediaDelete
+     * @request DELETE:/api/media/{mediaId}
      * @secure
      */
-    eventsMediaDelete: (
-      eventId: string,
-      mediaUid: string,
-      params: RequestParams = {}
-    ) =>
+    mediaDelete: (mediaId: string, params: RequestParams = {}) =>
       this.request<void, ErrorResponse>({
-        path: `/api/events/${eventId}/media/${mediaUid}`,
+        path: `/api/media/${mediaId}`,
         method: "DELETE",
         secure: true,
         ...params,
@@ -896,7 +974,7 @@ export class Api<
       },
       params: RequestParams = {}
     ) =>
-      this.request<GetParticipantEntryResponse, ErrorResponse | void>({
+      this.request<ParticipantShortEntryResponse, ErrorResponse | void>({
         path: `/api/participants`,
         method: "GET",
         query: query,
@@ -917,7 +995,7 @@ export class Api<
       data: UpsertParticipantEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetParticipantEntry, ErrorResponse>({
+      this.request<ParticipantShortEntry, ErrorResponse>({
         path: `/api/participants`,
         method: "POST",
         body: data,
@@ -973,7 +1051,7 @@ export class Api<
       data: UpsertParticipantEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetParticipantEntry, ErrorResponse>({
+      this.request<ParticipantShortEntry, ErrorResponse>({
         path: `/api/participants/${participantId}`,
         method: "PATCH",
         body: data,
@@ -1009,7 +1087,7 @@ export class Api<
       },
       params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseEntryResponse, ErrorResponse | void>({
+      this.request<PurchaseShortEntryResponse, ErrorResponse | void>({
         path: `/api/purchases`,
         method: "GET",
         query: query,
@@ -1027,7 +1105,7 @@ export class Api<
      * @secure
      */
     purchasesCreate: (data: UpsertPurchaseEntry, params: RequestParams = {}) =>
-      this.request<GetPurchaseEntry, ErrorResponse>({
+      this.request<PurchaseShortEntry, ErrorResponse>({
         path: `/api/purchases`,
         method: "POST",
         body: data,
@@ -1083,7 +1161,7 @@ export class Api<
       data: UpsertPurchaseEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseEntry, ErrorResponse>({
+      this.request<PurchaseShortEntry, ErrorResponse>({
         path: `/api/purchases/${purchaseId}`,
         method: "PATCH",
         body: data,
@@ -1111,7 +1189,7 @@ export class Api<
       },
       params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseTagEntryResponse, ErrorResponse | void>({
+      this.request<PurchaseTagShortEntryResponse, ErrorResponse | void>({
         path: `/api/purchase-tags`,
         method: "GET",
         query: query,
@@ -1132,7 +1210,7 @@ export class Api<
       data: UpsertPurchaseTagEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseTagEntry, ErrorResponse>({
+      this.request<PurchaseTagShortEntry, ErrorResponse>({
         path: `/api/purchase-tags`,
         method: "POST",
         body: data,
@@ -1188,7 +1266,7 @@ export class Api<
       data: UpsertPurchaseTagEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseTagEntry, ErrorResponse>({
+      this.request<PurchaseTagShortEntry, ErrorResponse>({
         path: `/api/purchase-tags/${purchaseTagId}`,
         method: "PATCH",
         body: data,
@@ -1215,7 +1293,7 @@ export class Api<
       },
       params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseUsageEntryResponse, ErrorResponse | void>({
+      this.request<PurchaseUsageShortEntryResponse, ErrorResponse | void>({
         path: `/api/purchase-usages`,
         method: "GET",
         query: query,
@@ -1236,7 +1314,7 @@ export class Api<
       data: UpsertPurchaseUsageEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseUsageEntry, ErrorResponse>({
+      this.request<PurchaseUsageShortEntry, ErrorResponse>({
         path: `/api/purchase-usages`,
         method: "POST",
         body: data,
@@ -1298,7 +1376,7 @@ export class Api<
       data: UpsertPurchaseUsageEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetPurchaseUsageEntry, ErrorResponse>({
+      this.request<PurchaseUsageShortEntry, ErrorResponse>({
         path: `/api/purchase-usages/${purchaseUsageId}`,
         method: "PATCH",
         body: data,
@@ -1329,7 +1407,7 @@ export class Api<
       },
       params: RequestParams = {}
     ) =>
-      this.request<GetShoppingEntryResponse, ErrorResponse | void>({
+      this.request<ShoppingShortEntryResponse, ErrorResponse | void>({
         path: `/api/shoppings`,
         method: "GET",
         query: query,
@@ -1347,7 +1425,7 @@ export class Api<
      * @secure
      */
     shoppingsCreate: (data: UpsertShoppingEntry, params: RequestParams = {}) =>
-      this.request<GetShoppingEntry, ErrorResponse>({
+      this.request<ShoppingShortEntry, ErrorResponse>({
         path: `/api/shoppings`,
         method: "POST",
         body: data,
@@ -1403,7 +1481,7 @@ export class Api<
       data: UpsertShoppingEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetShoppingEntry, ErrorResponse>({
+      this.request<ShoppingShortEntry, ErrorResponse>({
         path: `/api/shoppings/${shoppingId}`,
         method: "PATCH",
         body: data,
@@ -1431,7 +1509,7 @@ export class Api<
       },
       params: RequestParams = {}
     ) =>
-      this.request<GetUnitTypeEntryResponse, ErrorResponse | void>({
+      this.request<UnitTypeShortEntryResponse, ErrorResponse | void>({
         path: `/api/unit-types`,
         method: "GET",
         query: query,
@@ -1449,7 +1527,7 @@ export class Api<
      * @secure
      */
     unitTypesCreate: (data: UpsertUnitTypeEntry, params: RequestParams = {}) =>
-      this.request<GetUnitTypeEntry, ErrorResponse>({
+      this.request<UnitTypeShortEntry, ErrorResponse>({
         path: `/api/unit-types`,
         method: "POST",
         body: data,
@@ -1505,7 +1583,7 @@ export class Api<
       data: UpsertUnitTypeEntry,
       params: RequestParams = {}
     ) =>
-      this.request<GetUnitTypeEntry, ErrorResponse>({
+      this.request<UnitTypeShortEntry, ErrorResponse>({
         path: `/api/unit-types/${unitTypeId}`,
         method: "PATCH",
         body: data,

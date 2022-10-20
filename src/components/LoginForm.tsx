@@ -25,10 +25,10 @@ function Login() {
 
   const auth = useAuth();
 
-  const handleChange =
-    (prop: keyof State) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      setValues({ ...values, [prop]: event.target.value });
-    };
+  // const handleChange =
+  //   (prop: keyof State) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  //     setValues({ ...values, [prop]: event.target.value });
+  //   };
 
   const handleClickShowPassword = () => {
     setValues({
@@ -48,11 +48,11 @@ function Login() {
     auth.login({ username, password });
   }
 
-  const getEvents = api.api.eventsList;
+  // const getEvents = api.api.eventsList;
 
   return (
     <form className="page__form" onSubmit={onSubmit}>
-      <h1 className="form__header">Login Page</h1>
+      <h2 className="form__header">Login Page</h2>
       <div className="form__inputs">
         <TextField
           className="input__style"

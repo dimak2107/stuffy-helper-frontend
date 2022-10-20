@@ -7,47 +7,25 @@
 .event__status {
   padding: 8px;
   margin-left: auto;
-  font-size: 12px;
 }
 
 .event__photo {
 }
 
-.event__name {
-  font-family: "Inter";
-  font-weight: 600;
-  font-size: 16px;
-}
-
 .event__date {
-  font-family: "Inter";
-  font-weight: 600;
-  font-size: 12px;
   color: #b9a3a3;
-}
-
-.event__description {
-  font-family: "Inter";
-  font-weight: 600;
-  font-size: 16px;
 }
 
 .event__description-text {
   color: #666666;
 }
 
-.event__participants {
-  font-family: "Inter";
-  font-weight: 600;
-  font-size: 16px;
-}
-
 .event__participant {
   padding: 0 4px;
 }
 
-.event__purchases {
-  font-family: "Inter";
-  font-weight: 600;
-  font-size: 16px;
+.event__header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
 }

@@ -1,0 +1,18 @@
+.shopping__detailed {
+  padding: 8px;
+}
+
+.shopping__detailed ul {
+  list-style: none;
+}
+
+.shopping__detailed ul li {
+  padding: 8px 0;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.purchase__short {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

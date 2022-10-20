@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 import api from "../api/myApi";
 import { GetEventEntry } from "../api/__generated__/api";
 import EventDetail from "../components/EventDetail";
+import Loader from "../components/UI/loader/Loader";
+import { useOutletContext } from "react-router-dom";
 
-function EventPage() {
+function EventDetailedPage() {
   const [event, setEvent] = useState<GetEventEntry>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
@@ -26,11 +28,14 @@ function EventPage() {
       .finally(() => setLoading(false));
   }, [eventId]);
 
+  //TODO: украсть лоадер
+  if (!event) return <Loader />;
+
   return (
     <div className="events__list">
-      <EventDetail />
+      <EventDetail event={event} />
     </div>
   );
 }
 
-export default EventPage;
+export default EventDetailedPage;

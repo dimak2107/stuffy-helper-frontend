@@ -1,0 +1,11 @@
+.loader {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  border: 10px solid;
+  border-color: rgba(#fff, 0.15) rgba(#fff, 0.25) rgba(#fff, 0.35)
+    rgba(#fff, 0.5);
+  animation: rotation 1s linear infinite;
+}

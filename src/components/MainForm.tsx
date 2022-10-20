@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/myApi";
-import { GetEventEntry } from "../api/__generated__/api";
+import { EventShortEntry } from "../api/__generated__/api";
 import EventShort from "./EventShort";
 import "./MainForm.css";
 import { EventSearch } from "./EventSearch";
 import { useMemo } from "react";
 
 function GetEventList() {
-  const [eventList, setEventList] = useState<GetEventEntry[]>([]);
+  const [eventList, setEventList] = useState<EventShortEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [inputValue, setInputValue] = useState("");
@@ -28,7 +28,7 @@ function GetEventList() {
     () =>
       eventList
         .filter((elem) =>
-          elem.name.toLowerCase().includes(inputValue.toLowerCase())
+          elem.name?.toLowerCase().includes(inputValue.toLowerCase())
         )
         .map((event) => (
           <li key={event.id}>
@@ -37,7 +37,7 @@ function GetEventList() {
         )),
     [inputValue, eventList]
   );
-
+  console.log(event);
   return (
     <div className="events__list">
       <div className="events__search-bar">

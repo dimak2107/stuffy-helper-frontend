@@ -1,6 +1,7 @@
+import { Outlet } from "react-router-dom";
 import GetEventList from "../components/MainForm";
 
-function RootPage() {
+function EventsPage() {
   return (
     <div className="page">
       <h1 className="page__header">Главная страница</h1>
@@ -9,4 +10,4 @@ function RootPage() {
   );
 }
 
-export default RootPage;
+export default EventsPage;

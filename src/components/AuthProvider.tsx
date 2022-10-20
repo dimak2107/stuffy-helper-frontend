@@ -6,11 +6,11 @@ import React, {
   useMemo,
   useState,
 } from "react";
-// import { useHistory, useLocation } from "react-router-dom";
 import api, { addInterceptor } from "../api/myApi";
 import { LoginModel, RegisterModel } from "../api/__generated__/api";
 
 import { useNavigate, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 interface AuthContextType {
   // We defined the user type in `index.d.ts`, but it's
@@ -33,15 +33,14 @@ export function AuthProvider({
   children: ReactNode;
 }): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false);
-  //   const [user, setUser] = useState<User>();
   const [error, setError] = useState<any>();
+  //   const [user, setUser] = useState<User>();
   //   const [loadingInitial, setLoadingInitial] = useState<boolean>(true);
   // We are using `react-router` for this example,
   // but feel free to omit this or use the
   // router of your choice.
   const navigate = useNavigate();
   const location = useLocation();
-  // const [token, setToken] = useState(localStorage.getItem("token"));
   // If we change page, reset the error state.
   useEffect(() => {
     if (error) setError(null);
@@ -51,7 +50,7 @@ export function AuthProvider({
     if (!token) {
       return;
     }
-    addInterceptor(token);
+    addInterceptor(token, navigate);
   }, []);
 
   // Check if there is a currently active session
@@ -72,10 +71,9 @@ export function AuthProvider({
         headers: { "Content-Type": "application/json" },
       })
       .then((response) => {
-        // setToken(response.headers.token);
-        addInterceptor(response.headers.token);
+        addInterceptor(response.headers.token, navigate);
         localStorage.setItem("token", `${response.headers.token}`);
-        navigate("/");
+        navigate("/events");
         // history.push("/");
       })
       .catch((error) => setError(error))

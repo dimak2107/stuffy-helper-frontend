@@ -1,0 +1,10 @@
+.purchase-item {
+  display: flex;
+  align-items: center;
+}
+
+.purchase-item__count {
+  margin-left: auto;
+  padding: 8px;
+  color: #bdbdbd;
+}

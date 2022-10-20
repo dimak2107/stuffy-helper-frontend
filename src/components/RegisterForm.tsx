@@ -110,11 +110,6 @@ function Register() {
             onChange={(pass) => setPassword(pass.target.value)}
           ></OutlinedInput>
         </FormControl>
-
-        <label className="agreement">
-          <input type="checkbox" className="check"></input> I would like to
-          receive your newsletter and other promotional information.
-        </label>
       </div>
 
       <div className="page__btn">

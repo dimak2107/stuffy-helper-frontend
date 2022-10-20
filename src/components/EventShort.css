@@ -2,25 +2,22 @@
   padding: 16px 0;
 }
 
+.event-short a {
+  text-decoration: none;
+}
+
 .event-short__top {
   display: flex;
 }
 
 .event-short__time {
   margin-left: auto;
-  font-size: 14px;
-
-  /* Gray/03 */
-
   color: #bdbdbd;
 }
 
 .event-short__title {
-  font-weight: 600;
-  font-size: 16px;
 }
 
 .event-short__desc {
   margin-top: 8px;
-  font-size: 14px;
 }
