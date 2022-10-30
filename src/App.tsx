@@ -9,6 +9,8 @@ import ShoppingDetailPage from "./pages/ShoppingDetailPage";
 import MainPage from "./pages/MainPage";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import NewShoppingPage from "./pages/NewShoppingPage";
+import NewShoppingDetailPage from "./pages/NewShoppingDetailPage";
 
 function App() {
   return (
@@ -23,8 +25,16 @@ function App() {
             <Route path="/events/new" element={<NewEventPage />} />
             <Route path="/events/:eventId" element={<EventDetailedPage />} />
             <Route
+              path="/events/:eventId/shoppings/new"
+              element={<NewShoppingPage />}
+            />
+            <Route
               path="/events/:eventId/shoppings/:shoppingId"
               element={<ShoppingDetailPage />}
+            />
+            <Route
+              path="/events/:eventId/shoppings/:shoppingId/new"
+              element={<NewShoppingDetailPage />}
             />
           </Routes>
         </LocalizationProvider>

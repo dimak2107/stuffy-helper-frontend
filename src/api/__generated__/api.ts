@@ -9,6 +9,18 @@
  * ---------------------------------------------------------------
  */
 
+export interface AddShoppingEntry {
+  /** @format date-time */
+  shoppingDate: string;
+
+  /** @format uuid */
+  participantId: string;
+
+  /** @format uuid */
+  eventId: string;
+  description: string;
+}
+
 export interface ErrorResponse {
   message?: string | null;
   errors?: Record<string, string[]>;
@@ -48,6 +60,16 @@ export enum FileType {
   Docx = "Docx",
   Xls = "Xls",
   Xlsx = "Xlsx",
+  Link = "Link",
+}
+
+export interface FriendsRequestShort {
+  /** @format uuid */
+  id?: string;
+  userIdFrom?: string | null;
+  userIdTo?: string | null;
+  userNameFrom?: string | null;
+  userNameTo?: string | null;
 }
 
 export interface GetEventEntry {
@@ -216,6 +238,8 @@ export interface PurchaseShortEntry {
 
   /** @format int32 */
   count?: number;
+  purchaseTags?: PurchaseTagShortEntry[] | null;
+  unitType?: UnitTypeShortEntry;
 }
 
 export interface PurchaseShortEntryResponse {
@@ -306,7 +330,7 @@ export interface UnitTypeShortEntryResponse {
   total?: number;
 }
 
-export interface UpsertEventEntry {
+export interface UpdateEventEntry {
   name: string;
   description?: string | null;
 
@@ -317,6 +341,17 @@ export interface UpsertEventEntry {
   eventDateEnd?: string;
   isCompleted: boolean;
   isActive: boolean;
+}
+
+export interface UpdateShoppingEntry {
+  /** @format date-time */
+  shoppingDate: string;
+
+  /** @format uuid */
+  participantId: string;
+  check?: string | null;
+  description: string;
+  isActive?: boolean;
 }
 
 export interface UpsertParticipantEntry {
@@ -360,20 +395,6 @@ export interface UpsertPurchaseUsageEntry {
   participantId: string;
 }
 
-export interface UpsertShoppingEntry {
-  /** @format date-time */
-  shoppingDate: string;
-
-  /** @format uuid */
-  participantId: string;
-
-  /** @format uuid */
-  eventId: string;
-  check?: string | null;
-  description: string;
-  isActive?: boolean;
-}
-
 export interface UpsertUnitTypeEntry {
   name: string;
   isActive?: boolean;
@@ -393,6 +414,16 @@ export interface UserEntry {
 export interface UserShortEntry {
   id?: string | null;
   name?: string | null;
+}
+
+export interface UserShortEntryAuthResponse {
+  data?: UserShortEntry[] | null;
+
+  /** @format int32 */
+  totalPages?: number;
+
+  /** @format int32 */
+  total?: number;
 }
 
 import axios, {
@@ -582,6 +613,7 @@ export class Api<
      *
      * @tags Authorization
      * @name AuthRegisterCreate
+     * @summary Регистрация пользователя
      * @request POST:/api/auth/register
      * @secure
      */
@@ -601,6 +633,7 @@ export class Api<
      *
      * @tags Authorization
      * @name AuthLoginCreate
+     * @summary Логин
      * @request POST:/api/auth/login
      * @secure
      */
@@ -620,6 +653,7 @@ export class Api<
      *
      * @tags Authorization
      * @name AuthLogoutCreate
+     * @summary Выход
      * @request POST:/api/auth/logout
      * @secure
      */
@@ -636,6 +670,7 @@ export class Api<
      *
      * @tags Authorization
      * @name AuthRolesList
+     * @summary Список ролей
      * @request GET:/api/auth/roles
      * @secure
      */
@@ -653,6 +688,7 @@ export class Api<
      *
      * @tags Authorization
      * @name AuthIsAdminList
+     * @summary Проверка пользователя на администратора
      * @request GET:/api/auth/is-admin
      * @secure
      */
@@ -670,6 +706,7 @@ export class Api<
      *
      * @tags Authorization
      * @name AuthAccountList
+     * @summary Получение данных о пользователе
      * @request GET:/api/auth/account
      * @secure
      */
@@ -687,6 +724,7 @@ export class Api<
      *
      * @tags Authorization
      * @name AuthUsersList
+     * @summary Список зарегистрированных пользователей
      * @request GET:/api/auth/users
      * @secure
      */
@@ -708,6 +746,7 @@ export class Api<
      *
      * @tags Authorization
      * @name AuthEditPartialUpdate
+     * @summary Изменение данных пользователя
      * @request PATCH:/api/auth/edit
      * @secure
      */
@@ -737,6 +776,7 @@ export class Api<
      *
      * @tags Event
      * @name EventsList
+     * @summary Получение списка ивентов
      * @request GET:/api/events
      * @secure
      */
@@ -774,23 +814,23 @@ export class Api<
      *
      * @tags Event
      * @name EventsCreate
+     * @summary Добавление ивента
      * @request POST:/api/events
      * @secure
      */
     eventsCreate: (
-      query: {
-        name: string;
-        eventDateStart: string;
-        description?: string;
-        eventDateEnd?: string;
+      data: {
+        Name: string;
+        EventDateStart: string;
+        File?: File;
+        Description?: string;
+        EventDateEnd?: string;
       },
-      data: { file?: File },
       params: RequestParams = {}
     ) =>
       this.request<EventShortEntry, ErrorResponse>({
         path: `/api/events`,
         method: "POST",
-        query: query,
         body: data,
         secure: true,
         type: ContentType.FormData,
@@ -803,6 +843,7 @@ export class Api<
      *
      * @tags Event
      * @name EventsDetail
+     * @summary Получение ивента по его идентификатору
      * @request GET:/api/events/{eventId}
      * @secure
      */
@@ -820,6 +861,7 @@ export class Api<
      *
      * @tags Event
      * @name EventsDelete
+     * @summary Удаление ивента
      * @request DELETE:/api/events/{eventId}
      * @secure
      */
@@ -836,12 +878,13 @@ export class Api<
      *
      * @tags Event
      * @name EventsPartialUpdate
+     * @summary Извенение данных по ивенту
      * @request PATCH:/api/events/{eventId}
      * @secure
      */
     eventsPartialUpdate: (
       eventId: string,
-      data: UpsertEventEntry,
+      data: UpdateEventEntry,
       params: RequestParams = {}
     ) =>
       this.request<EventShortEntry, ErrorResponse>({
@@ -857,21 +900,194 @@ export class Api<
     /**
      * No description
      *
-     * @tags Media
-     * @name EventsMediaFormFileCreate
-     * @request POST:/api/events/{eventId}/media/form-file
+     * @tags Event
+     * @name EventsPhotoDelete
+     * @summary Удаление обложки ивента
+     * @request DELETE:/api/events/{eventId}/photo
      * @secure
      */
-    eventsMediaFormFileCreate: (
+    eventsPhotoDelete: (eventId: string, params: RequestParams = {}) =>
+      this.request<void, void>({
+        path: `/api/events/${eventId}/photo`,
+        method: "DELETE",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Event
+     * @name EventsPhotoPartialUpdate
+     * @summary Обновление обложки ивента
+     * @request PATCH:/api/events/{eventId}/photo
+     * @secure
+     */
+    eventsPhotoPartialUpdate: (
       eventId: string,
-      query: { mediaType: MediaType; link?: string },
       data: { file?: File },
       params: RequestParams = {}
     ) =>
-      this.request<GetMediaEntry, ErrorResponse>({
-        path: `/api/events/${eventId}/media/form-file`,
+      this.request<EventShortEntry, ErrorResponse>({
+        path: `/api/events/${eventId}/photo`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Friends
+     * @name FriendsList
+     * @summary Получение списка друзей
+     * @request GET:/api/friends
+     * @secure
+     */
+    friendsList: (
+      query?: { limit?: number; offset?: number },
+      params: RequestParams = {}
+    ) =>
+      this.request<UserShortEntryAuthResponse, ErrorResponse | void>({
+        path: `/api/friends`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags FriendsRequest
+     * @name RequestsSendedList
+     * @summary Получение списка отправленных заявок в друзья
+     * @request GET:/api/requests/sended
+     * @secure
+     */
+    requestsSendedList: (params: RequestParams = {}) =>
+      this.request<FriendsRequestShort[], ErrorResponse | void>({
+        path: `/api/requests/sended`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags FriendsRequest
+     * @name RequestsIncomingList
+     * @summary Получение списка входящих заявок в друзья
+     * @request GET:/api/requests/incoming
+     * @secure
+     */
+    requestsIncomingList: (params: RequestParams = {}) =>
+      this.request<FriendsRequestShort[], ErrorResponse | void>({
+        path: `/api/requests/incoming`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags FriendsRequest
+     * @name RequestsDetail
+     * @summary Получение информации о заявке в друзья по идентификатору
+     * @request GET:/api/requests/{requestId}
+     * @secure
+     */
+    requestsDetail: (requestId: string, params: RequestParams = {}) =>
+      this.request<FriendsRequestShort, ErrorResponse | void>({
+        path: `/api/requests/${requestId}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags FriendsRequest
+     * @name RequestsDelete
+     * @summary Удалить заявку в друзья
+     * @request DELETE:/api/requests/{requestId}
+     * @secure
+     */
+    requestsDelete: (requestId: string, params: RequestParams = {}) =>
+      this.request<void, ErrorResponse>({
+        path: `/api/requests/${requestId}`,
+        method: "DELETE",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags FriendsRequest
+     * @name RequestsAcceptCreate
+     * @summary Принять заявку в друзья
+     * @request POST:/api/requests/{requestId}/accept
+     * @secure
+     */
+    requestsAcceptCreate: (requestId: string, params: RequestParams = {}) =>
+      this.request<void, ErrorResponse>({
+        path: `/api/requests/${requestId}/accept`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags FriendsRequest
+     * @name RequestsCreate
+     * @summary Отправить заявку в друзья
+     * @request POST:/api/requests
+     * @secure
+     */
+    requestsCreate: (query: { userId: string }, params: RequestParams = {}) =>
+      this.request<FriendsRequestShort, ErrorResponse>({
+        path: `/api/requests`,
         method: "POST",
         query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Media
+     * @name MediaFormFileCreate
+     * @summary Добавление файла к ивенту
+     * @request POST:/api/media/form-file
+     * @secure
+     */
+    mediaFormFileCreate: (
+      data: {
+        EventId: string;
+        File?: File;
+        MediaType: MediaType;
+        Link?: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<GetMediaEntry, ErrorResponse>({
+        path: `/api/media/form-file`,
+        method: "POST",
         body: data,
         secure: true,
         type: ContentType.FormData,
@@ -884,6 +1100,7 @@ export class Api<
      *
      * @tags Media
      * @name MediaFormFileDetail
+     * @summary Получение файла
      * @request GET:/api/media/{mediaId}/form-file
      * @secure
      */
@@ -900,6 +1117,7 @@ export class Api<
      *
      * @tags Media
      * @name MediaMetadataDetail
+     * @summary Получение метаданных файла
      * @request GET:/api/media/{mediaId}/metadata
      * @secure
      */
@@ -917,6 +1135,7 @@ export class Api<
      *
      * @tags Media
      * @name MediaDelete
+     * @summary Удаление файла
      * @request DELETE:/api/media/{mediaId}
      * @secure
      */
@@ -933,6 +1152,7 @@ export class Api<
      *
      * @tags Media
      * @name MediaMetadataList
+     * @summary Получение списка метаданных файлов
      * @request GET:/api/media/metadata
      * @secure
      */
@@ -961,6 +1181,7 @@ export class Api<
      *
      * @tags Participant
      * @name ParticipantsList
+     * @summary Получение списка участников ивента
      * @request GET:/api/participants
      * @secure
      */
@@ -988,6 +1209,7 @@ export class Api<
      *
      * @tags Participant
      * @name ParticipantsCreate
+     * @summary Добавление участника
      * @request POST:/api/participants
      * @secure
      */
@@ -1010,6 +1232,7 @@ export class Api<
      *
      * @tags Participant
      * @name ParticipantsDetail
+     * @summary Получение участника ивента по идентификатору
      * @request GET:/api/participants/{participantId}
      * @secure
      */
@@ -1027,6 +1250,7 @@ export class Api<
      *
      * @tags Participant
      * @name ParticipantsDelete
+     * @summary Удаление участника
      * @request DELETE:/api/participants/{participantId}
      * @secure
      */
@@ -1043,6 +1267,7 @@ export class Api<
      *
      * @tags Participant
      * @name ParticipantsPartialUpdate
+     * @summary Изменение участника ивента (нужно или нет хз)
      * @request PATCH:/api/participants/{participantId}
      * @secure
      */
@@ -1066,6 +1291,7 @@ export class Api<
      *
      * @tags Purchase
      * @name PurchasesList
+     * @summary Получение списка покупок
      * @request GET:/api/purchases
      * @secure
      */
@@ -1101,6 +1327,7 @@ export class Api<
      *
      * @tags Purchase
      * @name PurchasesCreate
+     * @summary Добавление покупки
      * @request POST:/api/purchases
      * @secure
      */
@@ -1120,6 +1347,7 @@ export class Api<
      *
      * @tags Purchase
      * @name PurchasesDetail
+     * @summary Получение данных о покупке по идентификатору
      * @request GET:/api/purchases/{purchaseId}
      * @secure
      */
@@ -1137,6 +1365,7 @@ export class Api<
      *
      * @tags Purchase
      * @name PurchasesDelete
+     * @summary Удаление покупки
      * @request DELETE:/api/purchases/{purchaseId}
      * @secure
      */
@@ -1153,6 +1382,7 @@ export class Api<
      *
      * @tags Purchase
      * @name PurchasesPartialUpdate
+     * @summary Изменение данных о покупке
      * @request PATCH:/api/purchases/{purchaseId}
      * @secure
      */
@@ -1176,6 +1406,7 @@ export class Api<
      *
      * @tags PurchaseTag
      * @name PurchaseTagsList
+     * @summary Получение списка тэгов покупок
      * @request GET:/api/purchase-tags
      * @secure
      */
@@ -1203,6 +1434,7 @@ export class Api<
      *
      * @tags PurchaseTag
      * @name PurchaseTagsCreate
+     * @summary Добавление тэга покупки
      * @request POST:/api/purchase-tags
      * @secure
      */
@@ -1225,6 +1457,7 @@ export class Api<
      *
      * @tags PurchaseTag
      * @name PurchaseTagsDetail
+     * @summary Получение данных тэга покупки
      * @request GET:/api/purchase-tags/{purchaseTagId}
      * @secure
      */
@@ -1242,6 +1475,7 @@ export class Api<
      *
      * @tags PurchaseTag
      * @name PurchaseTagsDelete
+     * @summary Удаление тэга покупки
      * @request DELETE:/api/purchase-tags/{purchaseTagId}
      * @secure
      */
@@ -1258,6 +1492,7 @@ export class Api<
      *
      * @tags PurchaseTag
      * @name PurchaseTagsPartialUpdate
+     * @summary Изменение тэга покупки
      * @request PATCH:/api/purchase-tags/{purchaseTagId}
      * @secure
      */
@@ -1281,6 +1516,7 @@ export class Api<
      *
      * @tags PurchaseUsage
      * @name PurchaseUsagesList
+     * @summary Получение списка того, какие участники какие продукты используют
      * @request GET:/api/purchase-usages
      * @secure
      */
@@ -1307,6 +1543,7 @@ export class Api<
      *
      * @tags PurchaseUsage
      * @name PurchaseUsagesCreate
+     * @summary Добавление использования участником продукта
      * @request POST:/api/purchase-usages
      * @secure
      */
@@ -1329,6 +1566,7 @@ export class Api<
      *
      * @tags PurchaseUsage
      * @name PurchaseUsagesDetail
+     * @summary Получение данных об использовании участником продукта по идентификатору
      * @request GET:/api/purchase-usages/{purchaseUsageId}
      * @secure
      */
@@ -1349,6 +1587,7 @@ export class Api<
      *
      * @tags PurchaseUsage
      * @name PurchaseUsagesDelete
+     * @summary Удаление использования участником продукта
      * @request DELETE:/api/purchase-usages/{purchaseUsageId}
      * @secure
      */
@@ -1368,6 +1607,7 @@ export class Api<
      *
      * @tags PurchaseUsage
      * @name PurchaseUsagesPartialUpdate
+     * @summary Узменение использования участником продукта (а надо ли??)
      * @request PATCH:/api/purchase-usages/{purchaseUsageId}
      * @secure
      */
@@ -1391,6 +1631,7 @@ export class Api<
      *
      * @tags Shopping
      * @name ShoppingsList
+     * @summary Получение списка походов в магазин
      * @request GET:/api/shoppings
      * @secure
      */
@@ -1421,10 +1662,11 @@ export class Api<
      *
      * @tags Shopping
      * @name ShoppingsCreate
+     * @summary Добавление похода в магазин
      * @request POST:/api/shoppings
      * @secure
      */
-    shoppingsCreate: (data: UpsertShoppingEntry, params: RequestParams = {}) =>
+    shoppingsCreate: (data: AddShoppingEntry, params: RequestParams = {}) =>
       this.request<ShoppingShortEntry, ErrorResponse>({
         path: `/api/shoppings`,
         method: "POST",
@@ -1440,6 +1682,7 @@ export class Api<
      *
      * @tags Shopping
      * @name ShoppingsDetail
+     * @summary Получение информации о походе в магазин по идентификатору
      * @request GET:/api/shoppings/{shoppingId}
      * @secure
      */
@@ -1457,6 +1700,7 @@ export class Api<
      *
      * @tags Shopping
      * @name ShoppingsDelete
+     * @summary Удаление похода в магазин
      * @request DELETE:/api/shoppings/{shoppingId}
      * @secure
      */
@@ -1473,12 +1717,13 @@ export class Api<
      *
      * @tags Shopping
      * @name ShoppingsPartialUpdate
+     * @summary Изменение информации о походе в магазин
      * @request PATCH:/api/shoppings/{shoppingId}
      * @secure
      */
     shoppingsPartialUpdate: (
       shoppingId: string,
-      data: UpsertShoppingEntry,
+      data: UpdateShoppingEntry,
       params: RequestParams = {}
     ) =>
       this.request<ShoppingShortEntry, ErrorResponse>({
@@ -1496,6 +1741,7 @@ export class Api<
      *
      * @tags UnitType
      * @name UnitTypesList
+     * @summary Получение списка единиц измерения
      * @request GET:/api/unit-types
      * @secure
      */
@@ -1523,6 +1769,7 @@ export class Api<
      *
      * @tags UnitType
      * @name UnitTypesCreate
+     * @summary Добавление единицы измерения
      * @request POST:/api/unit-types
      * @secure
      */
@@ -1542,6 +1789,7 @@ export class Api<
      *
      * @tags UnitType
      * @name UnitTypesDetail
+     * @summary Получение информации о единице измерения по идентификатору
      * @request GET:/api/unit-types/{unitTypeId}
      * @secure
      */
@@ -1559,6 +1807,7 @@ export class Api<
      *
      * @tags UnitType
      * @name UnitTypesDelete
+     * @summary Удаление единицы измерения
      * @request DELETE:/api/unit-types/{unitTypeId}
      * @secure
      */
@@ -1575,6 +1824,7 @@ export class Api<
      *
      * @tags UnitType
      * @name UnitTypesPartialUpdate
+     * @summary Изменение единицы измерения
      * @request PATCH:/api/unit-types/{unitTypeId}
      * @secure
      */

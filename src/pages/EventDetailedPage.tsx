@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Outlet, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import api from "../api/myApi";
 import { GetEventEntry } from "../api/__generated__/api";
 import EventDetail from "../components/EventDetail";
 import Loader from "../components/UI/loader/Loader";
-import { useOutletContext } from "react-router-dom";
 
 function EventDetailedPage() {
   const [event, setEvent] = useState<GetEventEntry>();
@@ -12,7 +11,6 @@ function EventDetailedPage() {
   const [error, setError] = useState();
 
   let params = useParams();
-
   const eventId = params.eventId;
 
   useEffect(() => {

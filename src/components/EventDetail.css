@@ -10,6 +10,9 @@
 }
 
 .event__photo {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
 }
 
 .event__date {
@@ -25,6 +28,12 @@
 }
 
 .event__header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.list__header {
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;

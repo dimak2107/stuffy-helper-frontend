@@ -10,9 +10,9 @@ const PurchaseItem = ({ purchaseShort }: PurchaseListProps) => {
     <div className="purchase-item">
       <div>
         <h3>{purchaseShort.name}</h3>
-        <div className="text-sm">{purchaseShort.cost}</div>
+        <div className=" text-sm">{`${purchaseShort.count} ${purchaseShort.unitType?.name}`}</div>
       </div>
-      <div className="purchase-item__count text-sm">{purchaseShort.count}</div>
+      <div className="purchase-item__count text-sm">{purchaseShort.cost}</div>
     </div>
   );
 };

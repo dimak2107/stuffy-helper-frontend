@@ -42,6 +42,14 @@ h2 {
   width: 1280px;
 }
 
+.page__header {
+  background: transparent;
+  justify-content: space-between;
+  text-align: center;
+  font: bold;
+  display: flex;
+}
+
 .form__header {
   background: transparent;
   justify-content: center;
@@ -56,10 +64,6 @@ h2 {
 
 .form__inputs {
   margin: 36px 0;
-}
-
-.page__agreement {
-  background: transparent;
 }
 
 .page__btn {
@@ -85,7 +89,9 @@ h2 {
   display: block;
 }
 
-.check {
+.photo__loader {
+  padding: 8px;
+  width: 100%;
 }
 
 .text-sm {

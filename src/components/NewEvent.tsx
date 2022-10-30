@@ -1,16 +1,8 @@
 import { createRef, FormEvent, useState } from "react";
 import api from "../api/myApi";
 import useAuth from "./AuthProvider";
-import {
-  Button,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  OutlinedInput,
-  TextField,
-} from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Button, TextField } from "@mui/material";
+
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -35,16 +27,13 @@ function NewEvent({ onCreated }: { onCreated?: (id: string) => void }) {
       eventDateStart: dateStart.utc().format(),
       description: description,
       eventDateEnd: dateEnd?.utc().format(),
+      file: fileInputRef?.current?.files?.[0]
+        ? fileInputRef.current.files[0]
+        : "",
     };
 
-    const kekw: { file?: File } = {};
-
-    if (fileInputRef?.current?.files?.[0]) {
-      kekw.file = fileInputRef.current.files[0];
-    }
-
     try {
-      const { data } = await api.api.eventsCreate(query, kekw);
+      const { data } = await api.api.eventsCreate(query);
 
       if (onCreated) {
         onCreated(data.id);
@@ -70,29 +59,38 @@ function NewEvent({ onCreated }: { onCreated?: (id: string) => void }) {
           value={name}
           onChange={(name) => setName(name.target.value)}
         />
-
         <DesktopDatePicker
+          className="input__style"
           label="Дата начала события"
           inputFormat="DD/MM/YYYY"
           value={dateStart}
           onChange={(e) => setDateStart(e)}
-          renderInput={(params) => <TextField {...params} />}
+          renderInput={(params) => (
+            <TextField margin="dense" id="outlined-required" {...params} />
+          )}
         />
         <DesktopDatePicker
+          className="input__style"
           label="Дата окончания события"
           inputFormat="DD/MM/YYYY"
           value={dateEnd}
           onChange={(e) => setDateEnd(e)}
-          renderInput={(params) => <TextField {...params} />}
+          renderInput={(params) => (
+            <TextField margin="dense" id="outlined-required" {...params} />
+          )}
         />
-        <input type="file" ref={fileInputRef} />
+        <TextField
+          className="input__style"
+          id="outlined-required"
+          label="Описание события"
+          margin="dense"
+          value={description}
+          onChange={(description) => setDescription(description.target.value)}
+        />
+
+        <input className="photo__loader" type="file" ref={fileInputRef} />
         <div className="page__btn">
-          <Button
-            variant="contained"
-            type="submit"
-            disabled={loading}
-            className="page__btn"
-          >
+          <Button variant="contained" type="submit" disabled={loading}>
             Отправить
           </Button>
         </div>

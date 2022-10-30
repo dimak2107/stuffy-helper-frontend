@@ -8,7 +8,7 @@ import "dayjs/locale/ru";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import ShoppingShort from "./ShoppingShort";
 import Button from "@mui/material/Button";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 dayjs.extend(utc);
 dayjs.locale("ru");
@@ -53,7 +53,7 @@ function EventDetail({ event }: EventDetailProps) {
         <img
           src={event.mediaUri}
           alt="КРУТАЯ ФОТКА С УЧАСТНИКАМИ"
-          width={`300px`}
+          width={`100%`}
         />
       </div>
       <h2>{event?.name}</h2>
@@ -71,7 +71,19 @@ function EventDetail({ event }: EventDetailProps) {
         </AvatarGroup>
       </div>
       <div className="event__shopping-list">
-        <h3>Покупки:</h3>
+        <div className="list__header">
+          <h3>Покупки:</h3>
+          <Button
+            className="shopping__add-btn"
+            component={Link}
+            color="success"
+            size="small"
+            to={`/events/${event.id}/shoppings/new`}
+          >
+            +
+          </Button>
+        </div>
+
         <ul>{Shoppings}</ul>
       </div>
     </div>

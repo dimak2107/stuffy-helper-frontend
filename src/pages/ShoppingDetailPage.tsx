@@ -1,11 +1,6 @@
 import ShoppingDetail from "../components/ShoppingDetail";
-import { useOutletContext, useParams } from "react-router-dom";
-import {
-  GetPurchaseEntry,
-  GetShoppingEntry,
-  PurchaseShortEntry,
-  ShoppingShortEntry,
-} from "../api/__generated__/api";
+import { useParams } from "react-router-dom";
+import { GetShoppingEntry } from "../api/__generated__/api";
 import { useEffect, useState } from "react";
 import api from "../api/myApi";
 
@@ -17,12 +12,13 @@ const ShoppingDetailPage = () => {
   const [error, setError] = useState();
 
   let params = useParams();
+  const shoppingId = params.shoppingId;
 
   useEffect(() => {
-    if (!params.shoppingId) return;
+    if (!shoppingId) return;
 
     api.api
-      .shoppingsDetail(params.shoppingId, {
+      .shoppingsDetail(shoppingId, {
         headers: { "Content-Type": "application/json" },
       })
       .then((response) => {
