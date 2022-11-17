@@ -1,5 +1,7 @@
 .event-short {
   padding: 16px 0;
+  display: flex;
+  justify-content: right;
 }
 
 .event-short a {
@@ -15,9 +17,17 @@
   color: #bdbdbd;
 }
 
-.event-short__title {
-}
-
 .event-short__desc {
   margin-top: 8px;
+}
+
+.event-short__btns {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.event-short__text {
+  width: 100%;
+  flex-direction: column;
 }

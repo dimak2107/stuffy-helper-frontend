@@ -9,6 +9,23 @@
  * ---------------------------------------------------------------
  */
 
+export interface AddPurchaseEntry {
+  name: string;
+
+  /** @format double */
+  cost: number;
+
+  /** @format double */
+  amount: number;
+
+  /** @format uuid */
+  shoppingId: string;
+  purchaseTags?: PurchaseTagShortEntry[] | null;
+
+  /** @format uuid */
+  unitTypeId: string;
+}
+
 export interface AddShoppingEntry {
   /** @format date-time */
   shoppingDate: string;
@@ -124,10 +141,7 @@ export interface GetPurchaseEntry {
   cost: number;
 
   /** @format double */
-  weight?: number;
-
-  /** @format int32 */
-  count?: number;
+  amount: number;
   shopping: ShoppingShortEntry;
   purchaseTags?: PurchaseTagShortEntry[] | null;
   unitType: UnitTypeShortEntry;
@@ -234,10 +248,7 @@ export interface PurchaseShortEntry {
   cost: number;
 
   /** @format double */
-  weight?: number;
-
-  /** @format int32 */
-  count?: number;
+  amount: number;
   purchaseTags?: PurchaseTagShortEntry[] | null;
   unitType?: UnitTypeShortEntry;
 }
@@ -340,7 +351,20 @@ export interface UpdateEventEntry {
   /** @format date-time */
   eventDateEnd?: string;
   isCompleted: boolean;
-  isActive: boolean;
+}
+
+export interface UpdatePurchaseEntry {
+  name: string;
+
+  /** @format double */
+  cost: number;
+
+  /** @format double */
+  amount: number;
+  purchaseTags?: PurchaseTagShortEntry[] | null;
+
+  /** @format uuid */
+  unitTypeId: string;
 }
 
 export interface UpdateShoppingEntry {
@@ -351,40 +375,16 @@ export interface UpdateShoppingEntry {
   participantId: string;
   check?: string | null;
   description: string;
-  isActive?: boolean;
 }
 
 export interface UpsertParticipantEntry {
   /** @format uuid */
   eventId: string;
-  isActive?: boolean;
   userId: string;
-}
-
-export interface UpsertPurchaseEntry {
-  name: string;
-
-  /** @format double */
-  cost: number;
-
-  /** @format double */
-  weight?: number;
-
-  /** @format int32 */
-  count?: number;
-
-  /** @format uuid */
-  shoppingId: string;
-  purchaseTags: string[];
-
-  /** @format uuid */
-  unitTypeId: string;
-  isActive?: boolean;
 }
 
 export interface UpsertPurchaseTagEntry {
   name: string;
-  isActive?: boolean;
 }
 
 export interface UpsertPurchaseUsageEntry {
@@ -397,7 +397,6 @@ export interface UpsertPurchaseUsageEntry {
 
 export interface UpsertUnitTypeEntry {
   name: string;
-  isActive?: boolean;
 }
 
 export interface UserEntry {
@@ -426,18 +425,11 @@ export interface UserShortEntryAuthResponse {
   total?: number;
 }
 
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  HeadersDefaults,
-  ResponseType,
-} from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
 
-export interface FullRequestParams
-  extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
+export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -452,15 +444,11 @@ export interface FullRequestParams
   body?: unknown;
 }
 
-export type RequestParams = Omit<
-  FullRequestParams,
-  "body" | "method" | "query" | "path"
->;
+export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
 
-export interface ApiConfig<SecurityDataType = unknown>
-  extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+export interface ApiConfig<SecurityDataType = unknown> extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
   securityWorker?: (
-    securityData: SecurityDataType | null
+    securityData: SecurityDataType | null,
   ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
   secure?: boolean;
   format?: ResponseType;
@@ -479,16 +467,8 @@ export class HttpClient<SecurityDataType = unknown> {
   private secure?: boolean;
   private format?: ResponseType;
 
-  constructor({
-    securityWorker,
-    secure,
-    format,
-    ...axiosConfig
-  }: ApiConfig<SecurityDataType> = {}) {
-    this.instance = axios.create({
-      ...axiosConfig,
-      baseURL: axiosConfig.baseURL || "",
-    });
+  constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
+    this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "" });
     this.secure = secure;
     this.format = format;
     this.securityWorker = securityWorker;
@@ -498,10 +478,7 @@ export class HttpClient<SecurityDataType = unknown> {
     this.securityData = data;
   };
 
-  protected mergeRequestParams(
-    params1: AxiosRequestConfig,
-    params2?: AxiosRequestConfig
-  ): AxiosRequestConfig {
+  protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
     const method = params1.method || (params2 && params2.method);
 
     return {
@@ -509,11 +486,7 @@ export class HttpClient<SecurityDataType = unknown> {
       ...params1,
       ...(params2 || {}),
       headers: {
-        ...((method &&
-          this.instance.defaults.headers[
-            method.toLowerCase() as keyof HeadersDefaults
-          ]) ||
-          {}),
+        ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
         ...(params1.headers || {}),
         ...((params2 && params2.headers) || {}),
       },
@@ -531,15 +504,11 @@ export class HttpClient<SecurityDataType = unknown> {
   protected createFormData(input: Record<string, unknown>): FormData {
     return Object.keys(input || {}).reduce((formData, key) => {
       const property = input[key];
-      const propertyContent: Iterable<any> =
-        property instanceof Array ? property : [property];
+      const propertyContent: Iterable<any> = property instanceof Array ? property : [property];
 
       for (const formItem of propertyContent) {
         const isFileType = formItem instanceof Blob || formItem instanceof File;
-        formData.append(
-          key,
-          isFileType ? formItem : this.stringifyFormItem(formItem)
-        );
+        formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
       }
 
       return formData;
@@ -552,7 +521,7 @@ export class HttpClient<SecurityDataType = unknown> {
           ? property
           : typeof property === "object" && property !== null
           ? JSON.stringify(property)
-          : `${property}`
+          : `${property}`,
       );
       return formData;
     }, new FormData());
@@ -575,21 +544,14 @@ export class HttpClient<SecurityDataType = unknown> {
     const requestParams = this.mergeRequestParams(params, secureParams);
     const responseFormat = format || this.format || undefined;
 
-    if (
-      type === ContentType.FormData &&
-      body &&
-      body !== null &&
-      typeof body === "object"
-    ) {
+    if (type === ContentType.FormData && body && body !== null && typeof body === "object") {
       body = this.createFormData(body as Record<string, unknown>);
     }
 
     return this.instance.request({
       ...requestParams,
       headers: {
-        ...(type && type !== ContentType.FormData
-          ? { "Content-Type": type }
-          : {}),
+        ...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
         ...(requestParams.headers || {}),
       },
       params: query,
@@ -604,9 +566,7 @@ export class HttpClient<SecurityDataType = unknown> {
  * @title StuffyHelper.Hosting
  * @version 1.0
  */
-export class Api<
-  SecurityDataType extends unknown
-> extends HttpClient<SecurityDataType> {
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   api = {
     /**
      * No description
@@ -728,10 +688,7 @@ export class Api<
      * @request GET:/api/auth/users
      * @secure
      */
-    authUsersList: (
-      query?: { userName?: string },
-      params: RequestParams = {}
-    ) =>
+    authUsersList: (query?: { userName?: string }, params: RequestParams = {}) =>
       this.request<UserEntry[], ErrorResponse>({
         path: `/api/auth/users`,
         method: "GET",
@@ -760,7 +717,7 @@ export class Api<
         LastName?: string;
         Phone?: string;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<UserEntry, ErrorResponse>({
         path: `/api/auth/edit`,
@@ -798,7 +755,7 @@ export class Api<
         participantId?: string;
         shoppingId?: string;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<EventShortEntryResponse, ErrorResponse | void>({
         path: `/api/events`,
@@ -819,14 +776,8 @@ export class Api<
      * @secure
      */
     eventsCreate: (
-      data: {
-        Name: string;
-        EventDateStart: string;
-        File?: File;
-        Description?: string;
-        EventDateEnd?: string;
-      },
-      params: RequestParams = {}
+      data: { Name: string; EventDateStart: string; File?: File; Description?: string; EventDateEnd?: string },
+      params: RequestParams = {},
     ) =>
       this.request<EventShortEntry, ErrorResponse>({
         path: `/api/events`,
@@ -882,11 +833,7 @@ export class Api<
      * @request PATCH:/api/events/{eventId}
      * @secure
      */
-    eventsPartialUpdate: (
-      eventId: string,
-      data: UpdateEventEntry,
-      params: RequestParams = {}
-    ) =>
+    eventsPartialUpdate: (eventId: string, data: UpdateEventEntry, params: RequestParams = {}) =>
       this.request<EventShortEntry, ErrorResponse>({
         path: `/api/events/${eventId}`,
         method: "PATCH",
@@ -923,11 +870,7 @@ export class Api<
      * @request PATCH:/api/events/{eventId}/photo
      * @secure
      */
-    eventsPhotoPartialUpdate: (
-      eventId: string,
-      data: { file?: File },
-      params: RequestParams = {}
-    ) =>
+    eventsPhotoPartialUpdate: (eventId: string, data: { file?: File }, params: RequestParams = {}) =>
       this.request<EventShortEntry, ErrorResponse>({
         path: `/api/events/${eventId}/photo`,
         method: "PATCH",
@@ -947,10 +890,7 @@ export class Api<
      * @request GET:/api/friends
      * @secure
      */
-    friendsList: (
-      query?: { limit?: number; offset?: number },
-      params: RequestParams = {}
-    ) =>
+    friendsList: (query?: { limit?: number; offset?: number }, params: RequestParams = {}) =>
       this.request<UserShortEntryAuthResponse, ErrorResponse | void>({
         path: `/api/friends`,
         method: "GET",
@@ -1077,13 +1017,8 @@ export class Api<
      * @secure
      */
     mediaFormFileCreate: (
-      data: {
-        EventId: string;
-        File?: File;
-        MediaType: MediaType;
-        Link?: string;
-      },
-      params: RequestParams = {}
+      data: { EventId: string; File?: File; MediaType: MediaType; Link?: string },
+      params: RequestParams = {},
     ) =>
       this.request<GetMediaEntry, ErrorResponse>({
         path: `/api/media/form-file`,
@@ -1165,7 +1100,7 @@ export class Api<
         createdDateEnd?: string;
         mediaType?: MediaType;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<GetMediaEntry[], ErrorResponse>({
         path: `/api/media/metadata`,
@@ -1186,14 +1121,8 @@ export class Api<
      * @secure
      */
     participantsList: (
-      query?: {
-        offset?: number;
-        limit?: number;
-        eventId?: string;
-        userId?: string;
-        isActive?: boolean;
-      },
-      params: RequestParams = {}
+      query?: { offset?: number; limit?: number; eventId?: string; userId?: string },
+      params: RequestParams = {},
     ) =>
       this.request<ParticipantShortEntryResponse, ErrorResponse | void>({
         path: `/api/participants`,
@@ -1213,10 +1142,7 @@ export class Api<
      * @request POST:/api/participants
      * @secure
      */
-    participantsCreate: (
-      data: UpsertParticipantEntry,
-      params: RequestParams = {}
-    ) =>
+    participantsCreate: (data: UpsertParticipantEntry, params: RequestParams = {}) =>
       this.request<ParticipantShortEntry, ErrorResponse>({
         path: `/api/participants`,
         method: "POST",
@@ -1271,11 +1197,7 @@ export class Api<
      * @request PATCH:/api/participants/{participantId}
      * @secure
      */
-    participantsPartialUpdate: (
-      participantId: string,
-      data: UpsertParticipantEntry,
-      params: RequestParams = {}
-    ) =>
+    participantsPartialUpdate: (participantId: string, data: UpsertParticipantEntry, params: RequestParams = {}) =>
       this.request<ParticipantShortEntry, ErrorResponse>({
         path: `/api/participants/${participantId}`,
         method: "PATCH",
@@ -1300,18 +1222,13 @@ export class Api<
         offset?: number;
         limit?: number;
         name?: string;
-        countMin?: number;
-        countMax?: number;
         costMin?: number;
         costMax?: number;
-        weightMin?: number;
-        weightMax?: number;
         shoppingId?: string;
         purchaseTags?: string[];
         unitTypeId?: string;
-        isActive?: boolean;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<PurchaseShortEntryResponse, ErrorResponse | void>({
         path: `/api/purchases`,
@@ -1331,7 +1248,7 @@ export class Api<
      * @request POST:/api/purchases
      * @secure
      */
-    purchasesCreate: (data: UpsertPurchaseEntry, params: RequestParams = {}) =>
+    purchasesCreate: (data: AddPurchaseEntry, params: RequestParams = {}) =>
       this.request<PurchaseShortEntry, ErrorResponse>({
         path: `/api/purchases`,
         method: "POST",
@@ -1386,11 +1303,7 @@ export class Api<
      * @request PATCH:/api/purchases/{purchaseId}
      * @secure
      */
-    purchasesPartialUpdate: (
-      purchaseId: string,
-      data: UpsertPurchaseEntry,
-      params: RequestParams = {}
-    ) =>
+    purchasesPartialUpdate: (purchaseId: string, data: UpdatePurchaseEntry, params: RequestParams = {}) =>
       this.request<PurchaseShortEntry, ErrorResponse>({
         path: `/api/purchases/${purchaseId}`,
         method: "PATCH",
@@ -1411,14 +1324,8 @@ export class Api<
      * @secure
      */
     purchaseTagsList: (
-      query?: {
-        offset?: number;
-        limit?: number;
-        name?: string;
-        purchaseId?: string;
-        isActive?: boolean;
-      },
-      params: RequestParams = {}
+      query?: { offset?: number; limit?: number; name?: string; purchaseId?: string; isActive?: boolean },
+      params: RequestParams = {},
     ) =>
       this.request<PurchaseTagShortEntryResponse, ErrorResponse | void>({
         path: `/api/purchase-tags`,
@@ -1438,10 +1345,7 @@ export class Api<
      * @request POST:/api/purchase-tags
      * @secure
      */
-    purchaseTagsCreate: (
-      data: UpsertPurchaseTagEntry,
-      params: RequestParams = {}
-    ) =>
+    purchaseTagsCreate: (data: UpsertPurchaseTagEntry, params: RequestParams = {}) =>
       this.request<PurchaseTagShortEntry, ErrorResponse>({
         path: `/api/purchase-tags`,
         method: "POST",
@@ -1496,11 +1400,7 @@ export class Api<
      * @request PATCH:/api/purchase-tags/{purchaseTagId}
      * @secure
      */
-    purchaseTagsPartialUpdate: (
-      purchaseTagId: string,
-      data: UpsertPurchaseTagEntry,
-      params: RequestParams = {}
-    ) =>
+    purchaseTagsPartialUpdate: (purchaseTagId: string, data: UpsertPurchaseTagEntry, params: RequestParams = {}) =>
       this.request<PurchaseTagShortEntry, ErrorResponse>({
         path: `/api/purchase-tags/${purchaseTagId}`,
         method: "PATCH",
@@ -1521,13 +1421,8 @@ export class Api<
      * @secure
      */
     purchaseUsagesList: (
-      query?: {
-        offset?: number;
-        limit?: number;
-        participantId?: string;
-        purchaseId?: string;
-      },
-      params: RequestParams = {}
+      query?: { offset?: number; limit?: number; participantId?: string; purchaseId?: string },
+      params: RequestParams = {},
     ) =>
       this.request<PurchaseUsageShortEntryResponse, ErrorResponse | void>({
         path: `/api/purchase-usages`,
@@ -1547,10 +1442,7 @@ export class Api<
      * @request POST:/api/purchase-usages
      * @secure
      */
-    purchaseUsagesCreate: (
-      data: UpsertPurchaseUsageEntry,
-      params: RequestParams = {}
-    ) =>
+    purchaseUsagesCreate: (data: UpsertPurchaseUsageEntry, params: RequestParams = {}) =>
       this.request<PurchaseUsageShortEntry, ErrorResponse>({
         path: `/api/purchase-usages`,
         method: "POST",
@@ -1570,10 +1462,7 @@ export class Api<
      * @request GET:/api/purchase-usages/{purchaseUsageId}
      * @secure
      */
-    purchaseUsagesDetail: (
-      purchaseUsageId: string,
-      params: RequestParams = {}
-    ) =>
+    purchaseUsagesDetail: (purchaseUsageId: string, params: RequestParams = {}) =>
       this.request<GetPurchaseUsageEntry, ErrorResponse | void>({
         path: `/api/purchase-usages/${purchaseUsageId}`,
         method: "GET",
@@ -1591,10 +1480,7 @@ export class Api<
      * @request DELETE:/api/purchase-usages/{purchaseUsageId}
      * @secure
      */
-    purchaseUsagesDelete: (
-      purchaseUsageId: string,
-      params: RequestParams = {}
-    ) =>
+    purchaseUsagesDelete: (purchaseUsageId: string, params: RequestParams = {}) =>
       this.request<void, ErrorResponse>({
         path: `/api/purchase-usages/${purchaseUsageId}`,
         method: "DELETE",
@@ -1614,7 +1500,7 @@ export class Api<
     purchaseUsagesPartialUpdate: (
       purchaseUsageId: string,
       data: UpsertPurchaseUsageEntry,
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<PurchaseUsageShortEntry, ErrorResponse>({
         path: `/api/purchase-usages/${purchaseUsageId}`,
@@ -1644,9 +1530,8 @@ export class Api<
         participantId?: string;
         eventId?: string;
         description?: string;
-        isActive?: boolean;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<ShoppingShortEntryResponse, ErrorResponse | void>({
         path: `/api/shoppings`,
@@ -1721,11 +1606,7 @@ export class Api<
      * @request PATCH:/api/shoppings/{shoppingId}
      * @secure
      */
-    shoppingsPartialUpdate: (
-      shoppingId: string,
-      data: UpdateShoppingEntry,
-      params: RequestParams = {}
-    ) =>
+    shoppingsPartialUpdate: (shoppingId: string, data: UpdateShoppingEntry, params: RequestParams = {}) =>
       this.request<ShoppingShortEntry, ErrorResponse>({
         path: `/api/shoppings/${shoppingId}`,
         method: "PATCH",
@@ -1746,14 +1627,8 @@ export class Api<
      * @secure
      */
     unitTypesList: (
-      query?: {
-        offset?: number;
-        limit?: number;
-        name?: string;
-        purchaseId?: string;
-        isActive?: boolean;
-      },
-      params: RequestParams = {}
+      query?: { offset?: number; limit?: number; name?: string; purchaseId?: string; isActive?: boolean },
+      params: RequestParams = {},
     ) =>
       this.request<UnitTypeShortEntryResponse, ErrorResponse | void>({
         path: `/api/unit-types`,
@@ -1828,11 +1703,7 @@ export class Api<
      * @request PATCH:/api/unit-types/{unitTypeId}
      * @secure
      */
-    unitTypesPartialUpdate: (
-      unitTypeId: string,
-      data: UpsertUnitTypeEntry,
-      params: RequestParams = {}
-    ) =>
+    unitTypesPartialUpdate: (unitTypeId: string, data: UpsertUnitTypeEntry, params: RequestParams = {}) =>
       this.request<UnitTypeShortEntry, ErrorResponse>({
         path: `/api/unit-types/${unitTypeId}`,
         method: "PATCH",

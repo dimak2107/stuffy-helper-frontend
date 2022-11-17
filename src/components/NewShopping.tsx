@@ -56,17 +56,13 @@ function NewShopping({ onCreated }: { onCreated?: (id: string) => void }) {
           }
         />
         <DesktopDatePicker
+          className="input__style"
           label="Дата закупа"
           inputFormat="DD/MM/YYYY"
           value={queryData.shoppingDate}
           onChange={(e) => setQueryData({ ...queryData, shoppingDate: e })}
           renderInput={(params) => (
-            <TextField
-              margin="dense"
-              className="input__style"
-              id="outlined-required"
-              {...params}
-            />
+            <TextField margin="dense" id="outlined-required" {...params} />
           )}
         />
         {/* <TextField

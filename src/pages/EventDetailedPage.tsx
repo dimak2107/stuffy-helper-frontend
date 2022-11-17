@@ -26,7 +26,6 @@ function EventDetailedPage() {
       .finally(() => setLoading(false));
   }, [eventId]);
 
-  //TODO: украсть лоадер
   if (!event) return <Loader />;
 
   return (

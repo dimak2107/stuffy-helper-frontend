@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import EventsPage from "./pages/EventsPage";
@@ -10,7 +10,8 @@ import MainPage from "./pages/MainPage";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import NewShoppingPage from "./pages/NewShoppingPage";
-import NewShoppingDetailPage from "./pages/NewShoppingDetailPage";
+import NewPurchasePage from "./pages/NewPurchasePage";
+import EditPurchasePage from "./pages/EditPurchasePage";
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
       <AuthProvider>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Routes>
-            <Route path="/" element={<MainPage />} />
+            <Route path="/" element={<Navigate replace to="/events" />} />
+            {/* <Route path="/" element={<MainPage />} /> */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/events" element={<EventsPage />} />
@@ -34,7 +36,11 @@ function App() {
             />
             <Route
               path="/events/:eventId/shoppings/:shoppingId/new"
-              element={<NewShoppingDetailPage />}
+              element={<NewPurchasePage />}
+            />
+            <Route
+              path="/events/:eventId/shoppings/:shoppingId/:purchaseId"
+              element={<EditPurchasePage />}
             />
           </Routes>
         </LocalizationProvider>

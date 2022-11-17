@@ -1,100 +1,167 @@
-import React, { useState } from "react";
-import { Button, TextField } from "@mui/material";
-import {
-  PurchaseShortEntry,
-  UpsertPurchaseEntry,
-} from "../api/__generated__/api";
-import axios from "axios";
+// import "./NewShoppingDetail.css";
+
+import { Autocomplete, Button, TextField } from "@mui/material";
+import { FormEvent, useEffect, useState } from "react";
+import { json, useParams } from "react-router-dom";
 import api from "../api/myApi";
-// import PostItem from "./components/PostItem";
+import {
+  AddPurchaseEntry,
+  GetPurchaseEntry,
+  UnitTypeShortEntry,
+  UpdatePurchaseEntry,
+} from "../api/__generated__/api";
+import MenuItem from "@mui/material/MenuItem";
+import { KeyboardOptionKeySharp } from "@mui/icons-material";
 
-interface PurchaseFormProps {
-  create: PurchaseShortEntry;
-}
+// TODO: https://formik.org/docs/examples/with-material-ui
+const PurchaseForm = ({
+  onCreated,
+  initialPurchaseEntry,
+}: {
+  onCreated?: (id: string) => void;
+  initialPurchaseEntry?: GetPurchaseEntry;
+}) => {
+  let params = useParams();
+  const shoppingId = params.shoppingId!;
+  const [inputValue, setInputValue] = useState("");
 
-const PurchaseForm = ({ add }: PurchaseFormProps) => {
-  const [purchase, setPurchase] = useState({
-    name: "",
-    cost: "",
-    weight: "",
-    count: "",
-  });
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<any>();
+  const [name, setName] = useState(initialPurchaseEntry?.name ?? "");
+  const [cost, setCost] = useState(initialPurchaseEntry?.cost ?? "");
+  const [amount, setAmount] = useState(initialPurchaseEntry?.amount ?? "");
+  const [purchaseTags, setPurchaseTags] = useState(
+    initialPurchaseEntry?.purchaseTags?.map((tag) => tag.name) ?? []
+  );
+  // purchaseTags.push("еда");
+  const [unitType, setUnitType] = useState<UnitTypeShortEntry | null>(
+    initialPurchaseEntry?.unitType ?? null
+  );
+  const isActive = true;
 
-  // const addNewPurchase = (e) => {
-  //   e.preventDefault();
+  const [loading, setLoading] = useState(false);
+  const [unitTypes, setUnitTypes] = useState<UnitTypeShortEntry[]>([]);
 
-  //   // const newPurchase = { ...purchase, id: Date.now() };
+  const [error, setError] = useState();
 
-  //   add(purchase);
-  //   setPurchase({ name: "", cost: "", weight: "", count: "" });
-  // };
+  useEffect(() => {
+    api.api
+      .unitTypesList(undefined, {
+        headers: { "Content-Type": "application/json" },
+      })
+      .then((response) => {
+        setUnitTypes(response.data?.data ?? []);
+      })
+      .catch((error) => setError(error))
+      .finally(() => setLoading(false));
+  }, []);
 
-  // const addNewPurchase = (data: UpsertPurchaseEntry) => {
-  //   api.api
-  //     .purchasesCreate(data, {
-  //       headers: { "Content-Type": "application/json" },
-  //     })
-  //     .then((response) => {
-  //       // localStorage.setItem("token", `${response.headers.token}`);
-  //       // navigate("/events");
-  //       // history.push("/");
-  //     })
-  //     .catch((error) => setError(error))
-  //     .finally(() => setLoading(false));
-  // };
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
 
-  // const addNewPurchase = async (data: UpsertPurchaseEntry) => {
-  //   const { data: response } = await axios.post("", data);
-  // };
+    if (!shoppingId) return;
+    // if (!queryData.name) return;
+    // if (!queryData.cost) return;
+    // if (!queryData.purchaseTags) return;
+    // if (!queryData.unitTypeId) return;
+    setLoading(true);
 
-  // console.log(purchase);
+    try {
+      if (initialPurchaseEntry) {
+        if (!unitType) return;
+
+        const payload: UpdatePurchaseEntry = {
+          name,
+          cost: Number(cost),
+          amount: Number(amount),
+          // purchaseTags,
+          unitTypeId: unitType.id,
+        };
+        const data = await api.api.purchasesPartialUpdate(
+          initialPurchaseEntry.id,
+          payload
+        );
+      } else {
+        if (!unitType) return;
+
+        const payload: AddPurchaseEntry = {
+          name,
+          cost: Number(cost),
+          amount: Number(amount),
+          shoppingId,
+          // purchaseTags,
+          unitTypeId: unitType.id,
+        };
+        const data = await api.api.purchasesCreate(payload);
+      }
+
+      if (onCreated) {
+        onCreated(shoppingId);
+      }
+    } catch (error) {
+      console.log("fiasko");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <form>
-      <TextField
-        className="input__style"
-        id="outlined-required"
-        label="наименование"
-        margin="dense"
-        value={purchase.name}
-        onChange={(e) => setPurchase({ ...purchase, name: e.target.value })}
-      />
-      <TextField
-        className="input__style"
-        id="outlined-required"
-        label="стоимость"
-        margin="dense"
-        value={purchase.cost}
-        onChange={(e) => setPurchase({ ...purchase, cost: e.target.value })}
-      />
-      <TextField
-        className="input__style"
-        id="outlined-required"
-        label="вес"
-        margin="dense"
-        value={purchase.weight}
-        onChange={(e) => setPurchase({ ...purchase, weight: e.target.value })}
-      />
-      <TextField
-        className="input__style"
-        id="outlined-required"
-        label="кол-во"
-        margin="dense"
-        value={purchase.count}
-        onChange={(e) => setPurchase({ ...purchase, count: e.target.value })}
-      />
-      {/* <TextField
-        className="input__style"
-        id="outlined-required"
-        label="стоимость товара"
-        margin="dense"
-        value={purchase.unittype}
-        onChange={(e) => setPurchase({ ...purchase, unittype: e.target.value })}
-      /> */}
+    <form className="page__form" onSubmit={onSubmit}>
+      <div className="form__inputs">
+        <TextField
+          className="input__style"
+          id="outlined-required"
+          label="Название товара"
+          margin="dense"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-      {/* <Button onClick={addNewPurchase}>Добавить покупку</Button> */}
+        <TextField
+          className="input__style"
+          id="outlined-required"
+          label="Количество товара"
+          margin="dense"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+
+        <Autocomplete
+          value={unitType}
+          onChange={(event: any, newValue) => {
+            setUnitType(newValue);
+          }}
+          inputValue={inputValue}
+          onInputChange={(event, newInputValue) => {
+            setInputValue(newInputValue);
+          }}
+          id="controllable-states-demo"
+          options={unitTypes}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          getOptionLabel={(option) => option.name}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Единица измерения"
+              margin="dense"
+              className="input__style"
+            />
+          )}
+        />
+
+        <TextField
+          className="input__style"
+          id="outlined-required"
+          label="Стоимость товара"
+          margin="dense"
+          value={cost}
+          onChange={(e) => setCost(e.target.value)}
+        />
+
+        <div className="page__btn">
+          <Button variant="contained" type="submit" disabled={loading}>
+            Отправить
+          </Button>
+        </div>
+      </div>
     </form>
   );
 };

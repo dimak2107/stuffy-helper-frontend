@@ -1,14 +1,14 @@
 import Button from "@mui/material/Button";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import NewShopping from "../components/NewShopping";
-import NewShoppingDetail from "../components/NewShoppingDetail";
+import PurchaseForm from "../components/PurchaseForm";
 
-function NewShoppingDetailPage() {
+function NewPurchasePage() {
   const navigate = useNavigate();
   let params = useParams();
   const eventId = params.eventId;
   const shoppingId = params.shoppingId;
-  const onCreatedShop = (id: string): void => {
+  const onCreatedShop = (): void => {
     navigate(`/events/${eventId}/shoppings/${shoppingId}`);
   };
 
@@ -26,9 +26,9 @@ function NewShoppingDetailPage() {
         <h2>Добавление товара</h2>
       </div>
 
-      <NewShoppingDetail onCreated={onCreatedShop} />
+      <PurchaseForm onCreated={onCreatedShop} />
     </div>
   );
 }
 
-export default NewShoppingDetailPage;
+export default NewPurchasePage;

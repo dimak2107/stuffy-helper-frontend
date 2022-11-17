@@ -1,6 +1,7 @@
-import Button from "@mui/material/Button";
+import { IconButton } from "@mui/material";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import NewShopping from "../components/NewShopping";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 function NewShoppingPage() {
   const navigate = useNavigate();
@@ -13,14 +14,14 @@ function NewShoppingPage() {
   return (
     <div className="page">
       <div className="page__header">
-        <Button
+        <IconButton
           component={Link}
           color="success"
           size="small"
           to={`/events/${eventId}`}
         >
-          Back
-        </Button>
+          <ArrowBackIosNewIcon />
+        </IconButton>
         <h2 className="page__header">Создание покупки</h2>
       </div>
 

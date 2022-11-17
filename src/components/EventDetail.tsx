@@ -1,4 +1,4 @@
-import { AvatarGroup } from "@mui/material";
+import { AvatarGroup, IconButton } from "@mui/material";
 import { GetEventEntry } from "../api/__generated__/api";
 import Avatar from "@mui/material/Avatar";
 import "./EventDetail.css";
@@ -7,8 +7,11 @@ import utc from "dayjs/plugin/utc";
 import "dayjs/locale/ru";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import ShoppingShort from "./ShoppingShort";
-import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
 import { Link, useParams } from "react-router-dom";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import api from "../api/myApi";
+import { useMemo, useState } from "react";
 
 dayjs.extend(utc);
 dayjs.locale("ru");
@@ -19,6 +22,11 @@ interface EventDetailProps {
 }
 
 function EventDetail({ event }: EventDetailProps) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+  const [deletedShopping, setDeletedShopping] = useState(false);
+  const [shoppings, setShoppings] = useState(event?.shoppings);
+
   function dateFormat() {
     return dayjs.utc(event.eventDateStart).format("LL");
   }
@@ -33,18 +41,43 @@ function EventDetail({ event }: EventDetailProps) {
     </div>
   ));
 
-  const Shoppings = event?.shoppings?.map((shop) => (
-    <li key={shop.id}>
-      <ShoppingShort shoppingShort={shop} eventId={event.id} />
-    </li>
-  ));
+  const handleDeleteShopping = (shoppingId: string) => {
+    console.log(`deleted: ${shoppingId}`);
+
+    api.api
+      .shoppingsDelete(shoppingId)
+
+      .catch((error) => setError(error))
+      .finally(() => setLoading(false));
+    setDeletedShopping(deletedShopping === false ? true : false);
+    setShoppings(shoppings?.filter((elem) => elem.id !== shoppingId));
+  };
+
+  const ShoppingsDetailed = useMemo(
+    () =>
+      shoppings?.map((shop) => (
+        <li key={shop.id}>
+          <ShoppingShort
+            shoppingShort={shop}
+            eventId={event.id}
+            onDeleted={handleDeleteShopping}
+          />
+        </li>
+      )),
+    [deletedShopping]
+  );
 
   return (
     <div className="event__detailed">
       <div className="event__header">
-        <Button component={Link} color="success" size="small" to={`/events`}>
-          Back
-        </Button>
+        <IconButton
+          component={Link}
+          color="success"
+          size="small"
+          to={`/events`}
+        >
+          <ArrowBackIosNewIcon />
+        </IconButton>
         <div className="event__status">
           <label>{event?.isCompleted ? "Завершен" : "Не завершен"}</label>
         </div>
@@ -73,18 +106,18 @@ function EventDetail({ event }: EventDetailProps) {
       <div className="event__shopping-list">
         <div className="list__header">
           <h3>Покупки:</h3>
-          <Button
+          <IconButton
             className="shopping__add-btn"
             component={Link}
             color="success"
             size="small"
             to={`/events/${event.id}/shoppings/new`}
           >
-            +
-          </Button>
+            <AddIcon />
+          </IconButton>
         </div>
 
-        <ul>{Shoppings}</ul>
+        <ul>{ShoppingsDetailed}</ul>
       </div>
     </div>
   );

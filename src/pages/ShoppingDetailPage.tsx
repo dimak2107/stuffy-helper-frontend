@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { GetShoppingEntry } from "../api/__generated__/api";
 import { useEffect, useState } from "react";
 import api from "../api/myApi";
+import Loader from "../components/UI/loader/Loader";
 
 const ShoppingDetailPage = () => {
   const [shoppingDetail, setShoppingDetail] = useState<GetShoppingEntry | null>(
@@ -28,7 +29,7 @@ const ShoppingDetailPage = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  if (!shoppingDetail) return <div className="kek">Загрузка...</div>;
+  if (!shoppingDetail) return <Loader />;
 
   return (
     <div className="">
